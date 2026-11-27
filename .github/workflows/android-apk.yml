@@ -1,0 +1,65 @@
+name: Build Lamma Android APK
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/android-apk.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lamma-android-apk
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    if: github.repository == 'oday78994-prog/lamma' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build and sign installable APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk="$ANDROID_HOME"
+          tools="$sdk/build-tools/35.0.0"
+          platform="$sdk/platforms/android-35/android.jar"
+          if [[ ! -x "$tools/aapt2" || ! -f "$platform" ]]; then
+            sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+          fi
+          build=$(mktemp -d)
+          trap 'rm -rf "$build"' EXIT
+          mkdir -p "$build/classes" "$build/dex" dist
+          "$tools/aapt2" link -I "$platform" --manifest android/AndroidManifest.xml -o "$build/unsigned.apk"
+          javac --release 8 -encoding UTF-8 -classpath "$platform" -d "$build/classes" android/MainActivity.java
+          jar cf "$build/classes.jar" -C "$build/classes" .
+          "$tools/d8" --lib "$platform" --min-api 23 --output "$build/dex" "$build/classes.jar"
+          zip -j "$build/unsigned.apk" "$build/dex/classes.dex"
+          "$tools/zipalign" -f 4 "$build/unsigned.apk" "$build/aligned.apk"
+          keytool -genkeypair -keystore "$build/android.p12" -storetype PKCS12 \
+            -storepass lamma-build-only -alias lamma -keyalg RSA -keysize 2048 \
+            -validity 10000 -dname 'CN=Lamma Android Preview' -noprompt
+          apk=dist/Lamma-Tullab-v1.0.0.apk
+          "$tools/apksigner" sign --ks "$build/android.p12" --ks-key-alias lamma \
+            --ks-pass pass:lamma-build-only --out "$apk" "$build/aligned.apk"
+          "$tools/apksigner" verify --verbose --print-certs "$apk"
+          "$tools/aapt2" dump badging "$apk"
+      - name: Attach verified APK to the existing release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk=Lamma-Tullab-v1.0.0.apk
+          if gh release view v1.0.0 --json assets --jq '.assets[].name' | grep -Fxq "$apk"; then
+            echo 'The signed APK has already been published.'
+          else
+            gh release upload v1.0.0 "dist/$apk"
+          fi

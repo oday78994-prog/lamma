@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#0f111a">
+  <meta name="theme-color" content="#111a1c">
+  <meta name="application-version" content="1.0.0">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -381,6 +382,71 @@
     @media (hover: hover) {
       #roomScreen .mob-nav-btn:hover, .entry-card #openOwnerDashboard:hover { background: var(--selected); }
       #confirmJoinBtn:hover { filter: brightness(1.12); }
+    }
+    :root {
+      --chat-incoming: #233532;
+      --chat-outgoing: #164a40;
+      --chat-outgoing-ink: #ecfff7;
+      --edge: #334846;
+    }
+    body.light-mode {
+      --chat-incoming: #edf2ef;
+      --chat-outgoing: #d7eee4;
+      --chat-outgoing-ink: #173e34;
+      --edge: #dee8e3;
+    }
+    #roomScreen > header { border-color: var(--edge); }
+    #headerRoomCode { font-variant-numeric: tabular-nums; }
+    #roomScreen .desktop-view-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      min-height: 40px;
+    }
+    #roomScreen .desktop-view-btn[aria-current="page"] {
+      background: var(--selected);
+      color: var(--accent);
+      border-color: var(--edge);
+    }
+    #mobileTabChat { border-color: var(--edge); }
+    #chatFeed { padding-inline: 0 .25rem; }
+    #chatForm {
+      padding: .35rem;
+      border-radius: 1rem;
+      border: 1px solid var(--edge);
+      background: var(--room-field);
+    }
+    #chatForm #chatInput { min-width: 0; border-color: transparent; }
+    #chatForm button[type="submit"] {
+      min-width: 44px;
+      min-height: 44px;
+      color: #fff;
+      background: var(--action);
+      box-shadow: none;
+    }
+    #chatFeed .message-bubble {
+      background: var(--chat-incoming);
+      color: var(--ink);
+      border-radius: 1rem;
+      border-end-start-radius: .25rem;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+    #chatFeed .message-bubble.is-outgoing {
+      background: var(--chat-outgoing);
+      color: var(--chat-outgoing-ink);
+      border-end-start-radius: 1rem;
+      border-end-end-radius: .25rem;
+    }
+    #chatFeed .message-bubble img { object-fit: contain; background: var(--room-field); }
+    #subjectsGrid > .glass-card, #subjectPostsFeed > .summary-card {
+      background: var(--surface);
+      border-color: var(--edge);
+    }
+    #subjectPostsFeed .summary-title { color: var(--accent); font-size: 1rem; }
+    #subjectPostsFeed img { background: var(--room-field); }
+    @media (hover: hover) {
+      #roomScreen .desktop-view-btn:hover { background: var(--selected); }
     }
   </style>
 </head>
@@ -1266,6 +1332,7 @@
       <div class="p-5 overflow-y-auto flex-1">
         <!-- التبويب 1: المظهر (الوضع الداكن والفاتح فقط — الخلفية الرسمية مقفلة) -->
         <div id="settingsTabAppearance" class="space-y-4">
+          <p class="text-xs text-slate-400">لمّة طلاب · الإصدار <bdi>1.0.0</bdi></p>
           <div class="p-4 rounded-2xl bg-[#0f111a]/75 border border-white/10 space-y-3">
             <div class="text-sm font-black text-white">لون شاشة التطبيق</div>
             <p class="text-xs text-slate-400">اختر بين الوضع الداكن المريح للعين أو الوضع الفاتح الواضح. (خلفية التطبيق الرسمية ثابتة ولا يمكن تغييرها).</p>
@@ -1436,9 +1503,7 @@
 
         <div class="p-4 rounded-2xl bg-[#7c3aed]/15 border border-[#7c3aed]/35 space-y-2.5">
           <div class="text-xs sm:text-sm font-black text-violet-300">📦 تحميل ملف التطبيق الكامل</div>
-          <button id="downloadHtmlFileBtn" type="button" class="w-full py-3 rounded-xl font-extrabold text-xs sm:text-sm text-white keep-white-text bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] hover:brightness-110 transition cursor-pointer">
-            ⬇️ تحميل نسخة ملف التطبيق (lamma-tullab.html)
-          </button>
+          <a href="https://github.com/oday78994-prog/lamma/releases/download/v1.0.0/lamma-tullab-v1.0.0.html" class="block w-full py-3 rounded-xl text-center font-bold text-white keep-white-text bg-emerald-700 hover:brightness-110">تنزيل ملف لمّة طلاب 1.0.0</a>
         </div>
       </div>
     </div>
@@ -1977,7 +2042,6 @@
       installModal: document.getElementById('installModal'),
       closeInstallModalBtn: document.getElementById('closeInstallModalBtn'),
       pwaOneTapInstallBtn: document.getElementById('pwaOneTapInstallBtn'),
-      downloadHtmlFileBtn: document.getElementById('downloadHtmlFileBtn'),
 
       mediaShareModal: document.getElementById('mediaShareModal'),
       closeMediaShareModalBtn: document.getElementById('closeMediaShareModalBtn'),
@@ -2253,10 +2317,11 @@
         const manifest = {
           name: 'لَمّة طلاب — دردشة وألعاب جماعية',
           short_name: 'لَمّة طلاب',
-          start_url: '.',
+          id: new URL('.', location.href).pathname,
+          start_url: new URL('.', location.href).href,
           display: 'standalone',
-          background_color: '#0f111a',
-          theme_color: '#0f111a',
+          background_color: '#111a1c',
+          theme_color: '#111a1c',
           lang: 'ar',
           dir: 'rtl',
           icons: [{ src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }]
@@ -2274,22 +2339,6 @@
       state.deferredInstallPrompt = e;
       dom.pwaOneTapInstallBtn.classList.remove('hidden');
     });
-
-    function downloadAppHtmlFile() {
-      try {
-        const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'lamma-tullab.html';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-        showToast('⬇️ بدأ تحميل ملف التطبيق (lamma-tullab.html)!', 'success');
-      } catch (e) { showToast('تعذر تحميل الملف حالياً.', 'error'); }
-    }
 
     // =========================================================================
     // حفظ وتحميل تفضيلات المستخدم (في Firestore)
@@ -2366,6 +2415,7 @@
     // المصادقة وبدء التطبيق
     // =========================================================================
     async function initFirebaseApp() {
+      const ownerEntry = location.hash === '#owner';
       setupDynamicPWAManifest();
       loadLocalAthkarState();
       try {
@@ -2395,7 +2445,7 @@
 
         // البقاء تلقائياً داخل الغرفة المحفوظة حتى يضغط المستخدم زر الخروج
         const savedCode = localStorage.getItem(LS_ROOM_KEY);
-        if (savedCode && /^\d{4}$/.test(savedCode)) {
+        if (!ownerEntry && savedCode && /^\d{4}$/.test(savedCode)) {
           try {
             const snap = await getDoc(roomDocRef(savedCode));
             if (snap.exists()) {
@@ -2434,10 +2484,11 @@
 
         dom.loadingOverlay.classList.add('hidden');
         dom.entryScreen.classList.remove('hidden');
+        if (ownerEntry) openOwnerDashboard();
       } catch (err) {
         dom.loadingOverlay.classList.add('hidden');
         dom.entryScreen.classList.remove('hidden');
-        showToast('تعذر الاتصال بالخادم. اضغط زر تحديث 🔄 للمحاولة مجدداً.', 'error');
+        showToast('تعذر الاتصال بالخادم. أعد تحميل الصفحة للمحاولة مجددًا.', 'error');
       }
     }
 
@@ -2780,9 +2831,7 @@
               <span class="text-[10px] text-slate-500">${formatTime(msg.createdAt)}</span>
               ${state.isAdmin ? `<button data-del-msg="${msg.id}" class="text-[11px] text-rose-400 hover:text-rose-200 cursor-pointer">🗑️</button>` : ''}
             </div>
-            <div class="px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed break-words ${
-              isMe ? 'bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] text-white keep-white-text rounded-bl-sm' : 'bg-[#0f111a]/90 text-slate-100 border border-white/10 rounded-br-sm'
-            }">${bubbleContent}</div>
+            <div class="message-bubble px-3.5 py-2.5 text-sm leading-relaxed ${isMe ? 'is-outgoing' : ''}">${bubbleContent}</div>
           </div>
         `;
 
@@ -3131,6 +3180,8 @@
       dom.athkarWorkspaceWrap.classList.toggle('flex', view === 'athkar');
       document.querySelectorAll('.desktop-view-btn').forEach(btn => {
         const active = btn.dataset.desktopView === view;
+        if (active) btn.setAttribute('aria-current', 'page');
+        else btn.removeAttribute('aria-current');
         btn.className = `desktop-view-btn py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
           active ? 'font-black bg-[#7c3aed]/30 border border-[#7c3aed]/50 text-white' : 'font-bold text-slate-400 hover:text-white hover:bg-white/5'
         }`;
@@ -3701,14 +3752,16 @@
       });
     }
 
-    document.getElementById('openOwnerDashboard').addEventListener('click', () => {
+    function openOwnerDashboard() {
+      if (ownerDashboard.open) return;
       ownerRoomSelect.replaceChildren();
       const codes = state.user ? readOwnedCodes(state.user.uid) : [];
       for (const code of new Set(codes)) ownerRoomSelect.add(new Option('غرفة ' + code, code));
       ownerRoomSelect.disabled = codes.length === 0;
       ownerDashboard.showModal();
       watchOwnedRoom();
-    });
+    }
+    document.getElementById('openOwnerDashboard').addEventListener('click', openOwnerDashboard);
     ownerRoomSelect.addEventListener('change', watchOwnedRoom);
     ownerDashboard.addEventListener('close', () => {
       stopOwnerRoom?.();
@@ -3792,7 +3845,6 @@
       state.deferredInstallPrompt = null;
       dom.pwaOneTapInstallBtn.classList.add('hidden');
     });
-    dom.downloadHtmlFileBtn.addEventListener('click', downloadAppHtmlFile);
 
     // مؤقت الدراسة
     document.querySelectorAll('.timer-preset-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -4108,7 +4160,7 @@
       visiblePosts.forEach(post => {
         const canDelete = state.isAdmin || (state.user && post.senderId === state.user.uid);
         const card = document.createElement('div');
-        card.className = 'p-4 rounded-2xl bg-[#0f111a]/80 border border-white/10 space-y-2.5 animate-fade-up';
+        card.className = 'summary-card p-4 rounded-2xl border space-y-2.5 animate-fade-up';
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
@@ -4120,7 +4172,7 @@
             </div>
             ${canDelete ? `<button data-del-post="${post.id}" type="button" class="px-2 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 text-xs font-bold cursor-pointer">🗑️</button>` : ''}
           </div>
-          ${post.title ? `<div class="text-sm font-black text-cyan-400">${escapeHTML(post.title)}</div>` : ''}
+          ${post.title ? `<div class="summary-title font-bold">${escapeHTML(post.title)}</div>` : ''}
           ${post.text ? `<div class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap break-words">${escapeHTML(post.text)}</div>` : ''}
           ${post.imageData ? `<img src="${post.imageData}" alt="ملخص" data-post-img="1" class="w-full max-h-72 object-contain rounded-xl bg-black/40 border border-white/10 cursor-zoom-in" />` : ''}
         `;

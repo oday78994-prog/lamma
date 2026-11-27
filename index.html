@@ -475,6 +475,23 @@
       #mobileTabChat { padding: .75rem; }
       #roomScreen > nav { padding-block-end: max(.4rem, env(safe-area-inset-bottom)); }
     }
+    .room-brand { display:grid; place-items:center; width:36px; height:36px; flex-shrink:0; background:var(--selected); color:var(--accent); border-radius:12px }
+    .room-brand svg,.room-setting svg { width:22px; height:22px }
+    .entry-mark svg { width:36px; height:36px }
+    .room-setting { display:grid; place-items:center; width:44px; height:44px; border-radius:12px }
+    #roomScreen > nav .mob-nav-btn,#roomMoreLabel { background:transparent; color:var(--muted); min-height:44px; width:100%; font-size:.8rem }
+    #roomScreen > nav .mob-nav-btn[aria-current],#roomMoreLabel.is-current { background:var(--selected); color:var(--accent) }
+    .owner-report,.owner-member { padding:.65rem; border:1px solid var(--edge); border-radius:.75rem }
+    .owner-member button,.owner-report button { color:var(--accent); padding-inline:.6rem }
+    @media(max-width:1023px) {
+      #roomScreen > header { padding-inline:.5rem; padding-block-end:.25rem }
+      #roomScreen > header > div { flex-wrap:nowrap }
+      #headerAvatarBox,#headerUserIdText { display:none }
+      #openProfileBtn { background:transparent; border-color:transparent; padding-inline:.25rem }
+      #roomScreen > nav { padding-block:.25rem max(.3rem,env(safe-area-inset-bottom)) }
+      #mobileTabChat { border-radius:16px }
+    }
+    @media(max-width:360px) { .room-brand { display:none } }
   </style>
 </head>
 <body class="antialiased selection:bg-violet-600/30">
@@ -528,7 +545,7 @@
 
       <!-- الشعار والعنوان -->
       <div class="flex flex-col items-center text-center mb-5">
-        <div class="entry-mark" aria-hidden="true">ل</div>
+        <div class="entry-mark" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 10-5 10 5-10 5-10-5Z"/><path d="M6 11v5c3 3 9 3 12 0v-5m4-2v7"/></svg></div>
         <h1 class="text-3xl font-black tracking-tight text-white">لَمّة طلاب</h1>
         <p class="text-slate-400 text-xs sm:text-sm mt-1 font-semibold">
           ادرس والعب مع أصحابك في غرفة واحدة.
@@ -590,7 +607,15 @@
     <label for="ownerRoomSelect" class="block text-sm mb-2">الغرف المنشأة من هذا المتصفح</label>
     <select id="ownerRoomSelect" class="w-full rounded-xl px-3 mb-3 bg-transparent border"></select>
     <p id="ownerRoomStatus" role="status" class="mb-3"></p>
+    <section class="owner-report mb-4">
+      <h3 class="font-bold">تقرير الغرفة</h3>
+      <p id="ownerReport" aria-live="polite">اختر غرفة.</p>
+      <button id="ownerCount" type="button" disabled>احسب الرسائل</button>
+      <p id="ownerMessageStats" aria-live="polite"></p>
+    </section>
+    <h3 class="font-bold mb-2">الأعضاء</h3>
     <ul id="ownerRoomMembers" class="space-y-2 mb-3"></ul>
+    <details class="mb-4"><summary class="cursor-pointer font-bold">المحجوبون</summary><ul id="ownerBlocked" class="space-y-2 mt-2"></ul></details>
     <button id="ownerJoinRoom" type="button" class="rounded-xl border px-4" disabled>فتح الغرفة</button>
     <button id="ownerToggleLock" type="button" class="rounded-xl border px-4" disabled>قفل الانضمام</button>
     <button id="ownerCopyInvite" type="button" class="rounded-xl border px-4" disabled>نسخ رابط الدعوة</button>
@@ -607,7 +632,7 @@
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
         <!-- اليمين: الشعار + زر الملف الشخصي + مؤقت الدراسة المصغر -->
         <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] flex items-center justify-center text-lg shadow-md shrink-0">ل</div>
+          <div class="room-brand"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 10-5 10 5-10 5-10-5Z"/><path d="M6 11v5c3 3 9 3 12 0v-5m4-2v7"/></svg></div>
           <div class="min-w-0 hidden md:block">
             <div class="flex items-center gap-2">
               <h2 class="font-black text-base text-white truncate">لَمّة طلاب</h2>
@@ -647,10 +672,10 @@
 
           <!-- زر تحديث الصفحة المخصص -->
 
+          <button id="openSettingsBtn" class="room-setting" type="button" title="الإعدادات وتغيير المظهر" aria-label="الإعدادات وتغيير المظهر"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16M8 5v4m7 1v4m-5 1v4"/></svg></button>
           <details id="roomActions" class="room-menu">
             <summary aria-label="خيارات الغرفة" title="خيارات الغرفة">⋯</summary>
             <div class="room-menu-panel">
-              <button id="openSettingsBtn" type="button">الإعدادات</button>
               <button id="leaveRoomBtn" type="button" class="danger-action">مغادرة الغرفة</button>
             </div>
           </details>
@@ -1487,6 +1512,9 @@
       deleteField,
       collection,
       onSnapshot,
+      query,
+      where,
+      getCountFromServer,
       runTransaction
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -2307,49 +2335,37 @@
       try {
         await auth.authStateReady();
         state.user = auth.currentUser || (await signInAnonymously(auth)).user;
+        const savedCode = localStorage.getItem(LS_ROOM_KEY);
+        const canResume = !ownerEntry && (!invitedRoom || invitedRoom === savedCode) && /^\d{4}$/.test(savedCode || "");
+        const roomLoad = canResume ? getDoc(roomDocRef(savedCode)).then(snap => ({ snap }), error => ({ error })) : null;
         const [token] = await Promise.all([
           state.user.getIdTokenResult().catch(() => null),
           loadUserPreferences()
         ]);
         state.isAdmin = token?.claims?.admin === true;
         updateTimerUI();
-        startSubjectsListeners();
         renderAthkarList();
 
         // البقاء تلقائياً داخل الغرفة المحفوظة حتى يضغط المستخدم زر الخروج
-        const savedCode = localStorage.getItem(LS_ROOM_KEY);
-        if (!ownerEntry && (!invitedRoom || invitedRoom === savedCode) && savedCode && /^\d{4}$/.test(savedCode)) {
+        if (roomLoad) {
           try {
-            const snap = await getDoc(roomDocRef(savedCode));
+            const { snap, error } = await roomLoad;
+            if (error) throw error;
             if (snap.exists()) {
               const data = snap.data();
               const uid = state.user.uid;
-              if (!data.kickedUsers?.[uid] && (!data.locked || data.players?.[uid] || data.ownerUid === uid || state.isAdmin)) {
+              if (!data.kickedUsers?.[uid] && data.players?.[uid]) {
                 const existing = data.players?.[uid];
                 const finalName = state.profile.name || existing?.name || 'طالب';
                 state.profile.name = finalName;
                 dom.nicknameInput.value = finalName;
-                if (!existing) await updateDoc(roomDocRef(savedCode), {
-                  [`players.${uid}`]: {
-                    uid,
-                    name: finalName,
-                    avatar: state.profile.avatar || existing?.avatar || '🎓',
-                    photoUrl: state.profile.photoUrl || existing?.photoUrl || '',
-                    bio: state.profile.bio || existing?.bio || '',
-                    userIdTag: getEffectiveUserId(),
-                    isAdmin: state.isAdmin,
-                    score: existing?.score || 0,
-                    muted: Boolean(existing?.muted),
-                    joinedAt: existing?.joinedAt || Date.now()
-                  }
-                });
                 dom.loadingOverlay.classList.add('hidden');
                 enterRoomWorkspace(savedCode);
                 showToast(`مرحباً بعودتك للغرفة #${savedCode}! 👋`, 'cyan');
                 return;
               }
             }
-            localStorage.removeItem(LS_ROOM_KEY);
+            if (!snap.metadata.fromCache) localStorage.removeItem(LS_ROOM_KEY);
           } catch (rejoinErr) {
             showToast('تعذر فتح الغرفة المحفوظة. تحقق من الاتصال وحاول مجددًا.', 'warn');
           }
@@ -2529,6 +2545,11 @@
 
         dom.roomLockPill.classList.toggle('hidden', !data.locked);
         const me = uid ? data.players?.[uid] : null;
+        if (uid && !me && !snap.metadata.fromCache && !snap.metadata.hasPendingWrites) {
+          void leaveRoomWorkspace(false);
+          showToast("تمت إزالتك من الغرفة.", "warn");
+          return;
+        }
         const isMuted = Boolean(me?.muted) && !state.isAdmin;
         dom.mutedNotice.classList.toggle('hidden', !isMuted);
         dom.chatComposerWrap.classList.toggle('hidden', isMuted);
@@ -2540,7 +2561,8 @@
         if (!dom.adminModal.classList.contains('hidden')) renderAdminPanel();
       }, (err) => console.error('Room listener error:', err));
 
-      state.unsubMsgs = onSnapshot(messagesColRef(), (snap) => {
+      state.lastMsgCount = 0;
+      state.unsubMsgs = onSnapshot(query(messagesColRef(), where("roomCode", "==", code)), (snap) => {
         const msgs = snap.docs
           .map(d => ({ id: d.id, ...d.data() }))
           .filter(m => m.roomCode === state.roomCode)
@@ -3010,6 +3032,7 @@
 
     function switchDesktopView(view) {
       state.desktopView = view;
+      if (view === "subjects" && !state.unsubSubjects) startSubjectsListeners();
       dom.gamesWorkspaceWrap.classList.toggle('hidden', view !== 'games');
       dom.gamesWorkspaceWrap.classList.toggle('flex', view === 'games');
       dom.subjectsWorkspaceWrap.classList.toggle('hidden', view !== 'subjects');
@@ -3556,6 +3579,88 @@
     const ownerToggleLock = document.getElementById('ownerToggleLock');
     const ownerCopyInvite = document.getElementById('ownerCopyInvite');
     let lockPending = false;
+    const ownerReport = document.getElementById('ownerReport');
+    const ownerBlocked = document.getElementById('ownerBlocked');
+    const ownerCount = document.getElementById('ownerCount');
+    const ownerMessageStats = document.getElementById('ownerMessageStats');
+    let pendingCount = false;
+    ownerCount.addEventListener('click', async () => {
+      const code = ownedSnapshot?.code;
+      if (!code || pendingCount) return;
+      pendingCount = true;
+      ownerCount.disabled = true;
+      ownerMessageStats.textContent = 'جارٍ حساب الرسائل…';
+      try {
+        const result = await getCountFromServer(query(messagesColRef(), where('roomCode', '==', code)));
+        if (ownedSnapshot?.code === code) ownerMessageStats.textContent = 'الرسائل المحفوظة: ' + result.data().count;
+      } catch {
+        if (ownedSnapshot?.code === code) ownerMessageStats.textContent = 'تعذر جلب عدد الرسائل.';
+      } finally {
+        pendingCount = false;
+        ownerCount.disabled = !ownedSnapshot;
+      }
+    });
+
+    async function manageOwnedMember(code, memberUid, action, muted, button) {
+      const uid = state.user?.uid;
+      if (!uid || memberUid === uid || ownedSnapshot?.code !== code || button.disabled) return;
+      if ((action === 'remove' || action === 'block') && !confirm('تأكيد ' + button.textContent + ' العضو؟')) return;
+      button.disabled = true;
+      try {
+        const ref = roomDocRef(code);
+        await runTransaction(db, async transaction => {
+          const room = (await transaction.get(ref)).data();
+          if (room?.ownerUid !== uid) throw Error('owner_required');
+          const member = room.players?.[memberUid];
+          const playerPath = 'players.' + memberUid;
+          const blockedPath = 'kickedUsers.' + memberUid;
+          if (action === 'unblock') {
+            if (room.kickedUsers?.[memberUid]) transaction.update(ref, { [blockedPath]: deleteField() });
+          } else if (member && action === 'mute') {
+            transaction.update(ref, { [playerPath + '.muted']: !muted });
+          } else if (member) {
+            const changes = { [playerPath]: deleteField() };
+            if (action === 'block') changes[blockedPath] = { name: member.name || 'طالب', kickedAt: Date.now() };
+            if (room.xo?.playerX?.uid === memberUid) changes['xo.playerX'] = null;
+            if (room.xo?.playerO?.uid === memberUid) changes['xo.playerO'] = null;
+            transaction.update(ref, changes);
+          }
+        });
+      } catch {
+        if (ownedSnapshot?.code === code) ownerRoomStatus.textContent = 'تعذر تنفيذ الإجراء. تحقق من الاتصال وصلاحيات Firebase.';
+      } finally { button.disabled = false; }
+    }
+
+    function renderOwnedMembers(room, uid, code) {
+      const members = Object.entries(room.players || {});
+      const blocked = Object.entries(room.kickedUsers || {});
+      ownerReport.textContent = 'الأعضاء: ' + members.length + ' · المكتومون: ' + members.filter(([, member]) => member.muted).length + ' · المحجوبون: ' + blocked.length;
+      ownerCount.disabled = pendingCount;
+      ownerBlocked.replaceChildren();
+      for (const [list, entries] of [[ownerRoomMembers, members], [ownerBlocked, blocked]]) {
+        for (const [memberUid, member] of entries) {
+          const row = document.createElement('li');
+          row.className = 'owner-member';
+          const name = document.createElement('p');
+          name.textContent = (member?.name || 'طالب') + (memberUid === uid ? ' · المالك' : '');
+          row.append(name);
+          if (memberUid !== uid) {
+            const actions = list === ownerBlocked ? [['unblock', 'رفع الحجب']] :
+              [['mute', member.muted ? 'فك الكتم' : 'كتم'], ['remove', 'إزالة'], ['block', 'حجب']];
+            for (const [action, title] of actions) {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.textContent = title;
+              button.addEventListener('click', () => manageOwnedMember(code, memberUid, action, Boolean(member?.muted), button));
+              row.append(button);
+            }
+          }
+          list.append(row);
+        }
+      }
+      if (!blocked.length) ownerBlocked.textContent = 'لا يوجد أعضاء محجوبون.';
+    }
+
     let ownedSnapshot = null;
     ownerJoinRoom.addEventListener('click', () => {
       dom.roomCodeInput.value = ownerRoomSelect.value;
@@ -3569,6 +3674,10 @@
       ownedSnapshot = null;
       ownerToggleLock.disabled = true;
       ownerRoomMembers.replaceChildren();
+      ownerBlocked.replaceChildren();
+      ownerReport.textContent = "اختر غرفة.";
+      ownerMessageStats.textContent = "";
+      ownerCount.disabled = true;
       ownerCopyCode.disabled = true;
       ownerJoinRoom.disabled = true;
       ownerCopyInvite.disabled = true;
@@ -3586,6 +3695,8 @@
         ownerCopyInvite.disabled = true;
         ownedSnapshot = null;
         ownerToggleLock.disabled = true;
+        ownerCount.disabled = true;
+        ownerBlocked.replaceChildren();
         const room = snapshot.data();
         if (room?.ownerUid !== uid) {
           ownerRoomStatus.textContent = 'تعذر العثور على غرفة تملكها بهذا الرمز.';
@@ -3599,12 +3710,7 @@
         ownerCopyCode.disabled = false;
         ownerJoinRoom.disabled = false;
         ownerCopyInvite.disabled = false;
-        for (const player of players) {
-          const item = document.createElement('li');
-          item.className = 'rounded-lg border p-2';
-          item.textContent = (player.name || 'طالب') + (player.muted ? ' · مكتوم' : '');
-          ownerRoomMembers.append(item);
-        }
+        renderOwnedMembers(room, uid, code);
       }, () => {
         ownerRoomMembers.replaceChildren();
         ownerCopyCode.disabled = true;
@@ -3612,6 +3718,9 @@
         ownerCopyInvite.disabled = true;
         ownedSnapshot = null;
         ownerToggleLock.disabled = true;
+        ownerCount.disabled = true;
+        ownerBlocked.replaceChildren();
+        ownerReport.textContent = 'تعذر تحميل التقرير.';
         ownerRoomStatus.textContent = 'تعذر تحميل بيانات الغرفة.';
       });
     }
@@ -4399,7 +4508,7 @@
       }, { passive: false });
     })();
 
-    window.onload = initFirebaseApp;
+    void initFirebaseApp();
   </script>
 </body>
 </html>

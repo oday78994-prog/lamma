@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#0f111a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -232,6 +232,63 @@
       user-select: none;
       -webkit-user-select: none;
     }
+    :root {
+      --page: #111a1c;
+      --surface: #1b282b;
+      --line: #415354;
+      --accent: #66d6c3;
+      --action: #006b61;
+      --selected: #253e3c;
+    }
+    body.light-mode {
+      --page: #f7f6f2;
+      --surface: #fff;
+      --line: #c9d4d0;
+      --accent: #006b61;
+      --selected: #dceee8;
+      color: #17252a;
+    }
+    body, body.light-mode { background: var(--page); }
+    .glass-card, .glass-bar,
+    body.light-mode .glass-card, body.light-mode .glass-bar {
+      background: var(--surface);
+      border-color: var(--line);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
+    }
+    #entryScreen { padding-block-start: max(1rem, env(safe-area-inset-top)); }
+    #entryScreen > div:first-of-type { margin-block-start: auto; }
+    #entryScreen > div:last-of-type { margin-block-end: auto; flex-shrink: 0; }
+    #entryScreen button, #roomScreen nav button, #copyRoomCodeBtn { min-height: 44px; }
+    #roomCodeInput { min-width: 8rem; }
+    #confirmJoinBtn { background: var(--action); color: white; }
+    #createRoomBtn { background: var(--selected); color: var(--accent); box-shadow: none; }
+    body.light-mode #createRoomBtn { color: var(--accent) !important; }
+    #roomScreen > header { padding-block-start: max(.625rem, env(safe-area-inset-top)); }
+    #roomScreen > header > div { flex-wrap: wrap; }
+    #headerRoomCode, #copyRoomCodeBtn { color: var(--accent); }
+    #copyRoomCodeBtn { background: var(--selected); min-width: 44px; }
+    #roomScreen nav { padding-block-end: max(.375rem, env(safe-area-inset-bottom)); }
+    #roomScreen .mob-nav-btn[aria-current] { color: var(--accent); background: var(--selected); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    #roomScreen nav { padding-block-end: calc(.5rem + max(env(safe-area-inset-bottom), 12px)); padding-inline: max(.5rem, env(safe-area-inset-left), env(safe-area-inset-right)); }
+    #roomScreen { height: var(--room-height, 100dvh); }
+    #roomScreen.keyboard-open nav { display: none; }
+    #roomScreen.keyboard-open #chatComposerWrap { padding-bottom: .5rem; }
+    @media (max-width: 1023px) { #chatInput, #nicknameInput, #roomCodeInput { font-size: 16px; } }
+    #ownerDashboard { color: inherit; width: min(94vw, 680px); max-height: 85dvh; overflow: auto; }
+    #ownerDashboard::backdrop { background: #0009; }
+    #ownerDashboard button, #ownerDashboard select { min-height: 44px; }
+    button:disabled { opacity: .6; cursor: wait; }
+    #chatImageDraft { color: inherit; width: min(92vw, 520px); max-height: 85dvh; overflow: auto; }
+    #chatImageDraft::backdrop { background: #0009; }
+    #chatImageDraft img { max-height: 32dvh; max-width: 100%; }
+    #chatImageDraft button { min-height: 44px; }
+    #chatImageDraft button[type=submit] { background: var(--action); color: white; }
   </style>
 </head>
 <body class="antialiased selection:bg-violet-600/30">
@@ -269,7 +326,7 @@
   <!-- ===================================================================== -->
   <!-- الشاشة 1: شاشة الدخول السريع (Quick Entry Screen)                      -->
   <!-- ===================================================================== -->
-  <main id="entryScreen" class="hidden min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6">
+  <main id="entryScreen" class="hidden w-full flex flex-col items-center p-4 sm:p-6">
     <!-- أزرار سريعة في الأعلى -->
     <div class="w-full max-w-md flex items-center justify-between gap-2 mb-3">
       <button id="entryInstallBtn" type="button" class="px-3.5 py-2 rounded-xl bg-gradient-to-l from-[#7c3aed]/25 to-[#06b6d4]/25 hover:brightness-110 border border-cyan-400/35 text-xs font-extrabold text-cyan-400 flex items-center gap-1.5 transition cursor-pointer">
@@ -289,7 +346,7 @@
     </div>
 
     <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 animate-fade-up relative overflow-hidden">
-      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#06b6d4] via-[#7c3aed] to-[#06b6d4]"></div>
+      
 
       <!-- الشعار والعنوان -->
       <div class="flex flex-col items-center text-center mb-5">
@@ -298,12 +355,9 @@
         </div>
         <h1 class="text-3xl font-black tracking-tight text-white">لَمّة طلاب</h1>
         <p class="text-slate-400 text-xs sm:text-sm mt-1 font-semibold">
-          دردشة حقيقية، مؤقت دراسة وألعاب جماعية مباشرة عن بُعد
+          ادرس والعب مع أصحابك في غرفة واحدة.
         </p>
         <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 text-[11px] font-bold">
-            متصل مباشرة 🟢 • أشخاص حقيقيون فقط
-          </span>
           <span id="entryUserIdBadge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-400/30 text-violet-300 text-[11px] font-black">🆔 #3149</span>
         </div>
       </div>
@@ -316,35 +370,59 @@
       </div>
 
       <!-- اختيار الأفاتار -->
-      <div class="mb-5">
-        <label class="block text-xs font-bold text-slate-300 mb-2">اختر شخصيتك (الأفاتار)</label>
+      <details class="mb-5">
+        <summary class="text-sm font-bold mb-2 cursor-pointer">اختيار صورة شخصية (اختياري)</summary>
         <div id="avatarGrid" class="grid grid-cols-4 gap-2"><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#7c3aed]/30 border-2 border-[#7c3aed] scale-105">🎓</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🚀</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🦊</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🐱</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🎮</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🎨</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">⚡</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🌟</button></div>
-      </div>
+      </details>
 
       <!-- أزرار إنشاء غرفة أو انضمام -->
       <div class="space-y-2.5">
+        <div id="joinRoomBox" class="space-y-2">
+          <label for="roomCodeInput" class="block text-sm font-bold">رمز الغرفة</label>
+          <div class="flex flex-wrap gap-2">
+            <input id="roomCodeInput" type="text" inputmode="numeric" maxlength="4" placeholder="٤ أرقام" dir="ltr" class="flex-1 px-4 py-3 rounded-xl bg-[#0f111a]/90 border border-[#06b6d4]/40 text-white placeholder-slate-500 text-center tracking-widest font-black text-sm focus:outline-none focus:border-[#06b6d4]">
+            <button id="confirmJoinBtn" type="button" class="px-5 py-3 rounded-xl font-extrabold text-sm text-slate-950 bg-[#06b6d4] hover:brightness-110 transition cursor-pointer shrink-0">
+              انضمام
+            </button>
+          </div>
+          <p id="joinCodeError" class="hidden text-xs text-rose-400 font-bold" role="alert"></p>
+        </div>
         <button id="createRoomBtn" type="button" class="w-full py-3.5 px-5 rounded-xl font-extrabold text-sm text-white keep-white-text bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] hover:brightness-110 active:scale-[0.98] transition shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2 cursor-pointer">
           <span>✨</span>
           <span>إنشاء غرفة جديدة</span>
         </button>
-
-        <button id="toggleJoinBtn" type="button" class="w-full py-3 px-5 rounded-xl font-bold text-sm text-cyan-400 bg-[#06b6d4]/10 hover:bg-[#06b6d4]/20 border border-[#06b6d4]/30 active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer">
-          <span>🔑</span>
-          <span>انضمام لغرفة برمز</span>
-        </button>
-
-        <div id="joinRoomBox" class="hidden pt-2 space-y-2 animate-fade-up">
-          <div class="flex gap-2">
-            <input id="roomCodeInput" type="text" inputmode="numeric" maxlength="4" placeholder="رمز الغرفة (4 أرقام)" class="flex-1 px-4 py-3 rounded-xl bg-[#0f111a]/90 border border-[#06b6d4]/40 text-white placeholder-slate-500 text-center tracking-widest font-black text-sm focus:outline-none focus:border-[#06b6d4]">
-            <button id="confirmJoinBtn" type="button" class="px-5 py-3 rounded-xl font-extrabold text-sm text-slate-950 bg-[#06b6d4] hover:brightness-110 transition cursor-pointer shrink-0">
-              دخول
-            </button>
-          </div>
-          <p id="joinCodeError" class="hidden text-xs text-rose-400 font-bold"></p>
-        </div>
       </div>
+      <button id="openOwnerDashboard" type="button" class="w-full mt-4 rounded-xl border px-4 text-sm font-bold">لوحة غرفي</button>
     </div>
   </main>
+
+  <dialog id="chatImageDraft" class="glass-card rounded-2xl p-4" aria-labelledby="chatImageTitle">
+    <form>
+      <h2 id="chatImageTitle" class="text-lg font-bold mb-3">معاينة الصورة</h2>
+      <img alt="الصورة المختارة" class="mx-auto mb-3 rounded-xl object-contain">
+      <label class="block text-sm">تعليق اختياري
+        <input maxlength="300" class="block w-full rounded-xl border bg-transparent px-3 py-2 text-base">
+      </label>
+      <p role="status" class="my-2 text-sm"></p>
+      <div class="flex flex-wrap gap-2">
+        <button type="submit" class="rounded-xl px-4 font-bold">إرسال الصورة</button>
+        <button type="button" class="rounded-xl border px-4">إلغاء</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="ownerDashboard" aria-labelledby="ownerTitle" class="glass-card rounded-2xl p-5">
+    <form method="dialog" class="flex items-center justify-between gap-3 mb-4">
+      <h2 id="ownerTitle" class="text-xl font-bold">لوحة المالك</h2>
+      <button class="px-3">إغلاق</button>
+    </form>
+    <label for="ownerRoomSelect" class="block text-sm mb-2">الغرف المنشأة من هذا المتصفح</label>
+    <select id="ownerRoomSelect" class="w-full rounded-xl px-3 mb-3 bg-transparent border"></select>
+    <p id="ownerRoomStatus" role="status" class="mb-3"></p>
+    <ul id="ownerRoomMembers" class="space-y-2 mb-3"></ul>
+    <button id="ownerJoinRoom" type="button" class="rounded-xl border px-4" disabled>فتح الغرفة</button>
+    <button id="ownerCopyCode" type="button" class="rounded-xl border px-4" disabled>نسخ رمز الغرفة</button>
+  </dialog>
 
   <!-- ===================================================================== -->
   <!-- الشاشة 2: غرفة الطلاب المباشرة (Live Room Workspace)                  -->
@@ -386,7 +464,7 @@
           <div class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-[#0f111a]/85 border border-violet-500/35">
             <span class="text-[11px] text-slate-400 hidden lg:inline font-bold">الرمز:</span>
             <span id="headerRoomCode" class="font-black text-xs sm:text-sm tracking-widest text-[#06b6d4]">0000</span>
-            <button id="copyRoomCodeBtn" type="button" class="px-1.5 py-0.5 rounded-lg bg-[#7c3aed]/30 hover:bg-[#7c3aed]/50 text-violet-200 text-[11px] font-extrabold transition cursor-pointer" title="نسخ رمز الغرفة">📋</button>
+            <button id="copyRoomCodeBtn" type="button" class="px-1.5 py-0.5 rounded-lg bg-[#7c3aed]/30 hover:bg-[#7c3aed]/50 text-violet-200 text-[11px] font-extrabold transition cursor-pointer" title="نسخ رمز الغرفة">نسخ</button>
           </div>
 
           <!-- زر لوحة المشرف -->
@@ -982,10 +1060,6 @@
     <!-- شريط التنقل السفلي للهواتف -->
     <nav class="lg:hidden shrink-0 glass-bar border-t px-2 py-1.5 z-20">
       <div class="grid grid-cols-5 gap-1 max-w-lg mx-auto">
-        <button data-mob-tab="games" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl bg-[#7c3aed]/25 text-violet-400 font-bold text-[11px] transition cursor-pointer">
-          <span class="text-base leading-none mb-1">🎮</span>
-          <span>الألعاب</span>
-        </button>
         <button data-mob-tab="chat" type="button" class="mob-nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
           <span id="mobUnreadDot" class="hidden absolute top-1 left-1/3 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0f111a]"></span>
           <span class="text-base leading-none mb-1">💬</span>
@@ -994,6 +1068,10 @@
         <button data-mob-tab="subjects" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
           <span class="text-base leading-none mb-1">📚</span>
           <span>المواد</span>
+        </button>
+        <button data-mob-tab="games" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl bg-[#7c3aed]/25 text-violet-400 font-bold text-[11px] transition cursor-pointer">
+          <span class="text-base leading-none mb-1">🎮</span>
+          <span>الألعاب</span>
         </button>
         <button data-mob-tab="athkar" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
           <span class="text-base leading-none mb-1">📿</span>
@@ -1340,7 +1418,8 @@
       deleteDoc,
       deleteField,
       collection,
-      onSnapshot
+      onSnapshot,
+      runTransaction
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // تهيئة Firebase الخاصة بمشروع لَمّة طلاب (lamma-app-6b8d2)
@@ -1725,8 +1804,6 @@
       nicknameError: document.getElementById('nicknameError'),
       avatarGrid: document.getElementById('avatarGrid'),
       createRoomBtn: document.getElementById('createRoomBtn'),
-      toggleJoinBtn: document.getElementById('toggleJoinBtn'),
-      joinRoomBox: document.getElementById('joinRoomBox'),
       roomCodeInput: document.getElementById('roomCodeInput'),
       confirmJoinBtn: document.getElementById('confirmJoinBtn'),
       joinCodeError: document.getElementById('joinCodeError'),
@@ -2000,9 +2077,8 @@
         ta.style.opacity = '0';
         document.body.appendChild(ta);
         ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        return true;
+        try { return document.execCommand("copy"); }
+        finally { ta.remove(); }
       } catch (e) { return false; }
     }
 
@@ -2040,6 +2116,9 @@
     }
 
     function compressImageFile(file, maxWidth = 720, quality = 0.65) {
+      if ((file.type && !file.type.startsWith("image/")) || file.size > 20 * 1024 * 1024) {
+        return Promise.reject(new Error("اختر صورة بحجم 20 ميغابايت أو أقل."));
+      }
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = () => reject(new Error('read_error'));
@@ -2047,12 +2126,19 @@
           const img = new Image();
           img.onerror = () => reject(new Error('img_error'));
           img.onload = () => {
-            const scale = Math.min(1, maxWidth / img.width);
+            const scale = Math.min(1, maxWidth / Math.max(img.width, img.height));
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(img.width * scale));
             canvas.height = Math.max(1, Math.round(img.height * scale));
-            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', quality));
+            try {
+              const context = canvas.getContext('2d');
+              context.fillStyle = '#fff';
+              context.fillRect(0, 0, canvas.width, canvas.height);
+              context.drawImage(img, 0, 0, canvas.width, canvas.height);
+              const data = canvas.toDataURL('image/jpeg', quality);
+              if (data.length > 700 * 1024) throw new Error('حجم الصورة كبير بعد الضغط.');
+              resolve(data);
+            } catch (error) { reject(error); }
           };
           img.src = reader.result;
         };
@@ -2297,51 +2383,72 @@
       return name;
     }
 
+    function readOwnedCodes(uid) {
+      try {
+        const codes = JSON.parse(localStorage.getItem("lamma-owned-rooms:" + uid) || "[]");
+        return Array.isArray(codes) ? codes.filter(code => /^\d{4}$/.test(code)) : [];
+      } catch { return []; }
+    }
+
     async function createRoomOnline() {
       if (!state.user) return;
       if (!validateEntryNickname()) return;
 
-      const code = String(Math.floor(1000 + Math.random() * 9000));
+      let code;
       const uid = state.user.uid;
 
       try {
         dom.createRoomBtn.disabled = true;
+        dom.confirmJoinBtn.disabled = true;
         await saveUserPreferences();
-        await setDoc(roomDocRef(code), {
-          code,
-          createdAt: Date.now(),
-          locked: false,
-          kickedUsers: {},
-          players: {
-            [uid]: {
-              uid,
-              name: state.profile.name,
-              avatar: state.profile.avatar,
-              photoUrl: state.profile.photoUrl,
-              bio: state.profile.bio,
-              userIdTag: getEffectiveUserId(),
-              isAdmin: state.isAdmin,
-              score: 0,
-              muted: false,
-              joinedAt: Date.now()
-            }
-          },
-          xo: { board: Array(9).fill(''), turn: 'X', playerX: null, playerO: null, winner: '', winLine: [], scores: { X: 0, O: 0, draw: 0 } },
-          trivia: { status: 'idle', hostUid: uid, qIndex: 0, qStartTime: 0, answers: {}, roundScores: {} },
-          word: { status: 'idle', hostUid: uid, letter: 'أ', roundStartTime: 0, roundId: 1, submissions: {} }
+        code = await runTransaction(db, async transaction => {
+          for (let attempt = 0; attempt < 12; attempt++) {
+            const candidate = String(Math.floor(1000 + Math.random() * 9000));
+            const ref = roomDocRef(candidate);
+            if ((await transaction.get(ref)).exists()) continue;
+            transaction.set(ref, {
+              code: candidate,
+              ownerUid: uid,
+              createdAt: Date.now(),
+              locked: false,
+              kickedUsers: {},
+              players: {
+                [uid]: {
+                  uid,
+                  name: state.profile.name,
+                  avatar: state.profile.avatar,
+                  photoUrl: state.profile.photoUrl,
+                  bio: state.profile.bio,
+                  userIdTag: getEffectiveUserId(),
+                  isAdmin: state.isAdmin,
+                  score: 0,
+                  muted: false,
+                  joinedAt: Date.now()
+                }
+              },
+              xo: { board: Array(9).fill(''), turn: 'X', playerX: null, playerO: null, winner: '', winLine: [], scores: { X: 0, O: 0, draw: 0 } },
+              trivia: { status: 'idle', hostUid: uid, qIndex: 0, qStartTime: 0, answers: {}, roundScores: {} },
+              word: { status: 'idle', hostUid: uid, letter: 'أ', roundStartTime: 0, roundId: 1, submissions: {} }
+            });
+            return candidate;
+          }
+          throw new Error('no_available_code');
         });
+        try {
+          localStorage.setItem('lamma-owned-rooms:' + uid, JSON.stringify([code, ...readOwnedCodes(uid)]));
+        } catch { showToast('تعذر حفظ الغرفة في لوحة غرفي على هذا الجهاز.', 'warn'); }
         enterRoomWorkspace(code);
         showToast(`تم إنشاء الغرفة #${code}! شارك الرمز مع أصدقائك.`, 'success');
       } catch (e) {
         showToast('تعذر إنشاء الغرفة، حاول مجدداً.', 'error');
-      } finally { dom.createRoomBtn.disabled = false; }
+      } finally { dom.createRoomBtn.disabled = false; dom.confirmJoinBtn.disabled = false; }
     }
 
     async function joinRoomOnline() {
-      if (!state.user) return;
+      if (!state.user || dom.confirmJoinBtn.disabled) return;
       if (!validateEntryNickname()) return;
 
-      const code = dom.roomCodeInput.value.trim();
+      const code = dom.roomCodeInput.value.trim().replace(/[٠-٩۰-۹]/g, digit => String(digit.charCodeAt(0) & 15));
       if (!/^\d{4}$/.test(code)) {
         dom.joinCodeError.textContent = 'أدخل رمزاً صحيحاً مكوناً من 4 أرقام.';
         dom.joinCodeError.classList.remove('hidden');
@@ -2351,6 +2458,7 @@
 
       try {
         dom.confirmJoinBtn.disabled = true;
+        dom.createRoomBtn.disabled = true;
         const snap = await getDoc(roomDocRef(code));
         if (!snap.exists()) {
           dom.joinCodeError.textContent = 'لا توجد غرفة بهذا الرمز.';
@@ -2386,7 +2494,7 @@
         showToast(`تم الانضمام للغرفة #${code} بنجاح!`, 'success');
       } catch (e) {
         showToast('تعذر الانضمام للغرفة.', 'error');
-      } finally { dom.confirmJoinBtn.disabled = false; }
+      } finally { dom.confirmJoinBtn.disabled = false; dom.createRoomBtn.disabled = false; }
     }
 
     // =========================================================================
@@ -2403,7 +2511,7 @@
       dom.entryScreen.classList.add('hidden');
       dom.roomScreen.classList.remove('hidden');
       switchGameTab('xo');
-      switchMobileTab('games');
+      switchMobileTab(window.innerWidth < 1024 ? 'chat' : 'subjects');
 
       if (state.unsubRoom) state.unsubRoom();
       if (state.unsubMsgs) state.unsubMsgs();
@@ -2454,6 +2562,7 @@
       if (state.onlineTriviaTick) { clearInterval(state.onlineTriviaTick); state.onlineTriviaTick = null; }
       if (state.onlineWordTick) { clearInterval(state.onlineWordTick); state.onlineWordTick = null; }
       cleanupVoiceRecorder();
+      if (imageDialog.open) imageDialog.close();
 
       if (state.user && state.roomCode) {
         try {
@@ -2461,7 +2570,9 @@
           const updates = { [`players.${uid}`]: deleteField() };
           if (state.roomData?.xo?.playerX?.uid === uid) updates['xo.playerX'] = null;
           if (state.roomData?.xo?.playerO?.uid === uid) updates['xo.playerO'] = null;
-          await updateDoc(roomDocRef(state.roomCode), updates);
+          void updateDoc(roomDocRef(state.roomCode), updates).catch(() => {
+            if (notify) showToast('خرجت من الغرفة وتعذر تحديث قائمة الأعضاء.', 'warn');
+          });
         } catch (e) {}
       }
 
@@ -2624,6 +2735,7 @@
           createdAt: Date.now(),
           ...payload
         });
+        return true;
       } catch (e) { showToast('تعذر الإرسال. تأكد من أن حجم الملف مناسب.', 'error'); }
     }
 
@@ -2632,15 +2744,14 @@
       const clean = text.trim();
       if (!clean) return;
       if (clean.toLowerCase() === '/admin-lamma-2026' || clean === ADMIN_SECRET_PROMPT) {
-        activateAdminMode();
-        return;
+        await activateAdminMode();
+        return true;
       }
       const urlMatch = clean.match(/https?:\/\/\S+/i);
       if (urlMatch && /(?:youtube\.com|youtu\.be|facebook\.com|fb\.watch|instagram\.com|tiktok\.com)/i.test(urlMatch[0])) {
-        await sendRichChatPayload({ mediaType: 'external_video', mediaUrl: urlMatch[0], text: clean.replace(urlMatch[0], '').trim() });
-        return;
+        return sendRichChatPayload({ mediaType: 'external_video', mediaUrl: urlMatch[0], text: clean.replace(urlMatch[0], '').trim() });
       }
-      await sendRichChatPayload({ mediaType: 'text', text: clean });
+      return sendRichChatPayload({ mediaType: 'text', text: clean });
     }
 
     // تسجيل الصوت
@@ -2955,6 +3066,8 @@
       }
       document.querySelectorAll('.mob-nav-btn').forEach(btn => {
         const active = btn.dataset.mobTab === tab;
+        if (active) btn.setAttribute('aria-current', 'page');
+        else btn.removeAttribute('aria-current');
         btn.className = `mob-nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl font-bold text-[11px] transition cursor-pointer ${active ? 'bg-[#7c3aed]/25 text-violet-400' : 'text-slate-400'}`;
       });
     }
@@ -3445,13 +3558,109 @@
     // ربط الأحداث
     // =========================================================================
     dom.createRoomBtn.addEventListener('click', createRoomOnline);
-    dom.toggleJoinBtn.addEventListener('click', () => { dom.joinRoomBox.classList.toggle('hidden'); if (!dom.joinRoomBox.classList.contains('hidden')) dom.roomCodeInput.focus(); });
     dom.confirmJoinBtn.addEventListener('click', joinRoomOnline);
     dom.nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') createRoomOnline(); });
     dom.roomCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinRoomOnline(); });
 
     dom.copyRoomCodeBtn.addEventListener('click', () => { copyToClipboard(state.roomCode); showToast(`تم نسخ رمز الغرفة #${state.roomCode}!`, 'cyan'); });
-    dom.leaveRoomBtn.addEventListener('click', () => leaveRoomWorkspace(true));
+    const ownerDashboard = document.getElementById('ownerDashboard');
+    const ownerRoomSelect = document.getElementById('ownerRoomSelect');
+    const ownerRoomStatus = document.getElementById('ownerRoomStatus');
+    const ownerRoomMembers = document.getElementById('ownerRoomMembers');
+    const ownerCopyCode = document.getElementById('ownerCopyCode');
+    const ownerJoinRoom = document.getElementById('ownerJoinRoom');
+    ownerJoinRoom.addEventListener('click', () => {
+      dom.roomCodeInput.value = ownerRoomSelect.value;
+      ownerDashboard.close();
+      void joinRoomOnline();
+    });
+    let stopOwnerRoom;
+    function watchOwnedRoom() {
+      stopOwnerRoom?.();
+      stopOwnerRoom = undefined;
+      ownerRoomMembers.replaceChildren();
+      ownerCopyCode.disabled = true;
+      ownerJoinRoom.disabled = true;
+      const code = ownerRoomSelect.value;
+      const uid = state.user?.uid;
+      if (!uid || !code) {
+        ownerRoomStatus.textContent = 'أنشئ غرفة لتظهر هنا.';
+        return;
+      }
+      ownerRoomStatus.textContent = 'جارٍ تحميل الغرفة…';
+      stopOwnerRoom = onSnapshot(roomDocRef(code), snapshot => {
+        ownerRoomMembers.replaceChildren();
+        ownerCopyCode.disabled = true;
+        ownerJoinRoom.disabled = true;
+        const room = snapshot.data();
+        if (room?.ownerUid !== uid) {
+          ownerRoomStatus.textContent = 'تعذر العثور على غرفة تملكها بهذا الرمز.';
+          return;
+        }
+        const players = Object.values(room.players || {});
+        ownerRoomStatus.textContent = (room.locked ? 'غرفة مقفلة' : 'غرفة مفتوحة') + ' · الأعضاء المسجلون الآن ' + players.length;
+        ownerCopyCode.disabled = false;
+        ownerJoinRoom.disabled = false;
+        for (const player of players) {
+          const item = document.createElement('li');
+          item.className = 'rounded-lg border p-2';
+          item.textContent = (player.name || 'طالب') + (player.muted ? ' · مكتوم' : '');
+          ownerRoomMembers.append(item);
+        }
+      }, () => {
+        ownerRoomMembers.replaceChildren();
+        ownerCopyCode.disabled = true;
+        ownerJoinRoom.disabled = true;
+        ownerRoomStatus.textContent = 'تعذر تحميل بيانات الغرفة.';
+      });
+    }
+
+    document.getElementById('openOwnerDashboard').addEventListener('click', () => {
+      ownerRoomSelect.replaceChildren();
+      const codes = state.user ? readOwnedCodes(state.user.uid) : [];
+      for (const code of new Set(codes)) ownerRoomSelect.add(new Option('غرفة ' + code, code));
+      ownerRoomSelect.disabled = codes.length === 0;
+      ownerDashboard.showModal();
+      watchOwnedRoom();
+    });
+    ownerRoomSelect.addEventListener('change', watchOwnedRoom);
+    ownerDashboard.addEventListener('close', () => {
+      stopOwnerRoom?.();
+      stopOwnerRoom = undefined;
+    });
+    ownerCopyCode.addEventListener('click', async () => {
+      const code = ownerRoomSelect.value;
+      try { await navigator.clipboard.writeText(code); }
+      catch {
+        ownerRoomStatus.textContent = 'رمز الغرفة للنسخ اليدوي: ' + code;
+        return;
+      }
+      ownerRoomStatus.textContent = 'تم نسخ رمز الغرفة ' + code;
+    });
+
+    function updateRoomViewport() {
+      const viewport = window.visualViewport;
+      const editing = document.activeElement?.matches('input:not([type=file]), textarea, [contenteditable=true]');
+      if (!editing && viewport?.scale === 1) viewportBaseline = viewport.height;
+      const keyboard = window.innerWidth < 1024 && editing && viewport?.scale === 1
+        && viewportBaseline > viewport.height + 140;
+      dom.roomScreen.classList.toggle('keyboard-open', Boolean(keyboard));
+      if (keyboard) dom.roomScreen.style.setProperty('--room-height', viewport.height + 'px');
+      else dom.roomScreen.style.removeProperty('--room-height');
+    }
+    let viewportBaseline = window.visualViewport?.height ?? window.innerHeight;
+    window.visualViewport?.addEventListener('resize', updateRoomViewport);
+    document.addEventListener('focusin', () => {
+      requestAnimationFrame(updateRoomViewport);
+    });
+    document.addEventListener('focusout', () => requestAnimationFrame(updateRoomViewport));
+
+    dom.leaveRoomBtn.addEventListener('click', async () => {
+      if (!window.confirm('هل تريد مغادرة الغرفة؟ يمكنك الرجوع بالرمز.')) return;
+      dom.leaveRoomBtn.disabled = true;
+      try { await leaveRoomWorkspace(true); dom.nicknameInput.focus(); }
+      finally { dom.leaveRoomBtn.disabled = false; }
+    });
 
     // الملف الشخصي
     dom.openProfileBtn.addEventListener('click', openProfileModal);
@@ -3537,14 +3746,72 @@
     dom.closeKickedModalBtn.addEventListener('click', () => dom.kickedModal.classList.add('hidden'));
 
     // الوسائط والدردشة
-    dom.chatImageInput.addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+    const imageDialog = document.getElementById('chatImageDraft');
+    const imagePreview = imageDialog.querySelector('img');
+    const imageCaption = imageDialog.querySelector('input');
+    const imageStatus = imageDialog.querySelector('[role=status]');
+    const imageSend = imageDialog.querySelector('button[type=submit]');
+    let imageDraft;
+    imageDialog.addEventListener('close', () => {
+      imageDraft = undefined;
+      imagePreview.removeAttribute('src');
+      imageCaption.value = '';
+      imageStatus.textContent = '';
+      imageSend.textContent = 'إرسال الصورة';
+    });
+    imageDialog.addEventListener('cancel', event => {
+      if (imageSend.disabled) event.preventDefault();
+    });
+    imageDialog.querySelector('button[type=button]').addEventListener('click', () => {
+      if (!imageSend.disabled) imageDialog.close();
+    });
+    dom.chatImageInput.addEventListener('change', async event => {
+      const input = event.target;
+      const file = input.files?.[0];
+      const room = state.roomCode;
+      if (!file || !room || input.disabled || imageDialog.open) return;
+      input.disabled = true;
+      showToast('جارٍ تجهيز معاينة الصورة…', 'cyan');
       try {
-        const compressed = await compressImageFile(file, 720, 0.65);
-        await sendRichChatPayload({ mediaType: 'image', mediaData: compressed, text: '' });
-      } catch (err) { showToast('تعذر إرسال الصورة.', 'error'); }
-      e.target.value = '';
+        const data = await compressImageFile(file, 720, 0.65);
+        if (state.roomCode !== room) return;
+        imageDraft = { room, data };
+        imagePreview.src = data;
+        imageDialog.showModal();
+      } catch {
+        showToast('تعذر تجهيز الصورة. اختر صورة صالحة بحجم 20 ميغابايت أو أقل.', 'error');
+      } finally {
+        input.value = '';
+        input.disabled = false;
+      }
+    });
+    imageDialog.querySelector('form').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (imageSend.disabled || !imageDraft) return;
+      if (state.roomCode !== imageDraft.room) {
+        imageDialog.close();
+        return;
+      }
+      imageSend.disabled = true;
+      imageCaption.disabled = true;
+      imageStatus.textContent = 'جارٍ إرسال الصورة…';
+      try {
+        const sent = await sendRichChatPayload({
+          mediaType: 'image',
+          mediaData: imageDraft.data,
+          text: imageCaption.value.trim()
+        });
+        if (sent) {
+          imageDialog.close();
+          showToast('تم إرسال الصورة.', 'success');
+        } else {
+          imageStatus.textContent = 'تعذر الإرسال. يمكنك إعادة المحاولة.';
+          imageSend.textContent = 'إعادة المحاولة';
+        }
+      } finally {
+        imageSend.disabled = false;
+        imageCaption.disabled = false;
+      }
     });
     dom.openMediaShareBtn.addEventListener('click', () => dom.mediaShareModal.classList.remove('hidden'));
     dom.closeMediaShareModalBtn.addEventListener('click', () => dom.mediaShareModal.classList.add('hidden'));
@@ -3580,7 +3847,20 @@
       e.target.value = '';
     });
 
-    dom.chatForm.addEventListener('submit', e => { e.preventDefault(); sendOnlineChatMessage(dom.chatInput.value); dom.chatInput.value = ''; });
+    let sendingChat = false;
+    dom.chatForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (sendingChat) return;
+      const draft = dom.chatInput.value;
+      const room = state.roomCode;
+      sendingChat = true;
+      try {
+        if (await sendOnlineChatMessage(draft) && state.roomCode === room && dom.chatInput.value === draft) {
+          dom.chatInput.value = '';
+        }
+      } catch { showToast('تعذر إرسال الرسالة. يمكنك إعادة المحاولة.', 'error'); }
+      finally { sendingChat = false; }
+    });
     document.querySelectorAll('.quick-react-btn').forEach(btn => btn.addEventListener('click', () => sendOnlineChatMessage(btn.dataset.reaction)));
     document.querySelectorAll('.game-tab-btn').forEach(btn => btn.addEventListener('click', () => switchGameTab(btn.dataset.gameTab)));
     document.querySelectorAll('.mob-nav-btn').forEach(btn => btn.addEventListener('click', () => switchMobileTab(btn.dataset.mobTab)));
@@ -3791,6 +4071,7 @@
       if (!text && !imageData) { showToast('اكتب ملخصاً أو أرفق صورة أولاً.', 'warn'); return; }
       try {
         dom.publishSubjectPostBtn.disabled = true;
+        dom.publishSubjectPostBtn.textContent = 'جارٍ النشر…';
         await addDoc(subjectPostsColRef(), {
           subjectId: state.activeSubjectId,
           title,
@@ -3810,7 +4091,10 @@
         showToast('📤 تم نشر الملخص بنجاح!', 'success');
       } catch (e) {
         showToast('تعذر النشر. تأكد من أن حجم الصورة مناسب.', 'error');
-      } finally { dom.publishSubjectPostBtn.disabled = false; }
+      } finally {
+        dom.publishSubjectPostBtn.disabled = false;
+        dom.publishSubjectPostBtn.textContent = 'نشر الملخص';
+      }
     }
 
     // =========================================================================
@@ -3974,21 +4258,27 @@
     dom.addSubjectBtn.addEventListener('click', handleAddSubject);
     dom.backToSubjectsBtn.addEventListener('click', () => {
       state.activeSubjectId = '';
+      state.pendingSubjectImage = '';
+      dom.subjectImgPreviewWrap.classList.add('hidden');
+      dom.subjectPostTitleInput.value = '';
+      dom.subjectPostTextInput.value = '';
       dom.subjectDetailView.classList.add('hidden');
       dom.subjectsListView.classList.remove('hidden');
     });
     dom.subjectPostImageInput.addEventListener('change', async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      const subject = state.activeSubjectId;
+      e.target.disabled = true;
       try {
         const compressed = await compressImageFile(file, 900, 0.72);
+        if (state.activeSubjectId !== subject) return;
         state.pendingSubjectImage = compressed;
         dom.subjectImgPreview.src = compressed;
         dom.subjectImgPreviewWrap.classList.remove('hidden');
       } catch (err) {
-        showToast('تعذر قراءة الصورة.', 'error');
-      }
-      e.target.value = '';
+        showToast('تعذر تجهيز الصورة. اختر صورة صالحة بحجم 20 ميغابايت أو أقل.', 'error');
+      } finally { e.target.value = ''; e.target.disabled = false; }
     });
     dom.removeSubjectImgBtn.addEventListener('click', () => {
       state.pendingSubjectImage = '';
@@ -4072,3 +4362,4 @@
   </script>
 </body>
 </html>
+

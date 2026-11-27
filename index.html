@@ -447,6 +447,34 @@
     @media (hover: hover) {
       #roomScreen .desktop-view-btn:hover { background: var(--selected); }
     }
+    .room-menu { position: relative; flex-shrink: 0; }
+    .room-menu > summary {
+      display: grid; place-items: center; min-width: 44px; min-height: 44px;
+      border-radius: .75rem; color: var(--ink); cursor: pointer;
+      font-weight: 700; list-style: none; background: var(--room-field);
+    }
+    .room-menu > summary::-webkit-details-marker { display: none; }
+    .room-menu > summary.is-current { color: var(--accent); background: var(--selected); }
+    .room-menu-panel {
+      position: absolute; z-index: 40; min-width: 9rem; border: 1px solid var(--edge);
+      background: var(--surface); box-shadow: var(--shadow); border-radius: .85rem; padding: .25rem;
+    }
+    .room-menu-panel button { display: block; width: 100%; text-align: start; padding: .55rem .65rem; min-height: 44px; border-radius: .5rem; }
+    .room-menu-panel button:hover, .room-menu-panel button:focus-visible { background: var(--selected); }
+    #attachmentMenu .room-menu-panel { inset-block-end: calc(100% + .45rem); inset-inline-start: 0; }
+    #roomMore .room-menu-panel { inset-block-end: calc(100% + .45rem); inset-inline-end: 0; }
+    #roomActions .room-menu-panel { inset-block-start: calc(100% + .45rem); inset-inline-end: 0; }
+    #roomActions summary { font-size: 1.25rem; }
+    .danger-action { color: #e2636b; }
+    #chatForm { gap: .3rem; }
+    #chatForm input { width: 0; }
+    #chatForm input[hidden] { display: none; }
+    #roomScreen nav .mob-nav-btn, #roomMoreLabel { font-size: .82rem; font-weight: 700; }
+    #roomScreen nav .mob-nav-btn { justify-content: center; }
+    @media (max-width: 1023px) {
+      #mobileTabChat { padding: .75rem; }
+      #roomScreen > nav { padding-block-end: max(.4rem, env(safe-area-inset-bottom)); }
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-violet-600/30">
@@ -500,7 +528,7 @@
 
       <!-- الشعار والعنوان -->
       <div class="flex flex-col items-center text-center mb-5">
-        <div class="entry-mark" aria-hidden="true">🎓</div>
+        <div class="entry-mark" aria-hidden="true">ل</div>
         <h1 class="text-3xl font-black tracking-tight text-white">لَمّة طلاب</h1>
         <p class="text-slate-400 text-xs sm:text-sm mt-1 font-semibold">
           ادرس والعب مع أصحابك في غرفة واحدة.
@@ -564,6 +592,8 @@
     <p id="ownerRoomStatus" role="status" class="mb-3"></p>
     <ul id="ownerRoomMembers" class="space-y-2 mb-3"></ul>
     <button id="ownerJoinRoom" type="button" class="rounded-xl border px-4" disabled>فتح الغرفة</button>
+    <button id="ownerToggleLock" type="button" class="rounded-xl border px-4" disabled>قفل الانضمام</button>
+    <button id="ownerCopyInvite" type="button" class="rounded-xl border px-4" disabled>نسخ رابط الدعوة</button>
     <button id="ownerCopyCode" type="button" class="rounded-xl border px-4" disabled>نسخ رمز الغرفة</button>
   </dialog>
 
@@ -577,7 +607,7 @@
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
         <!-- اليمين: الشعار + زر الملف الشخصي + مؤقت الدراسة المصغر -->
         <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] flex items-center justify-center text-lg shadow-md shrink-0">🎓</div>
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] flex items-center justify-center text-lg shadow-md shrink-0">ل</div>
           <div class="min-w-0 hidden md:block">
             <div class="flex items-center gap-2">
               <h2 class="font-black text-base text-white truncate">لَمّة طلاب</h2>
@@ -588,7 +618,7 @@
 
           <!-- زر قائمة الملف الشخصي مع الـ ID -->
           <button id="openProfileBtn" type="button" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer min-w-0 max-w-[190px] sm:max-w-[230px]" title="الملف الشخصي">
-            <div id="headerAvatarBox" class="w-7 h-7 rounded-lg bg-[#0f111a] border border-white/15 flex items-center justify-center text-base overflow-hidden shrink-0">🎓</div>
+            <div id="headerAvatarBox" class="w-7 h-7 rounded-lg bg-[#0f111a] border border-white/15 flex items-center justify-center text-base overflow-hidden shrink-0">ل</div>
             <div class="min-w-0 text-right">
               <div id="headerUsername" class="text-xs font-extrabold text-white truncate leading-tight">طالب</div>
               <div id="headerUserIdText" class="text-[10px] font-black text-cyan-400 leading-tight">🆔 #3149</div>
@@ -612,22 +642,18 @@
 
           <!-- زر لوحة المشرف -->
           <button id="openAdminBtn" type="button" class="hidden items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-l from-rose-600 to-amber-500 hover:brightness-110 text-white keep-white-text text-xs sm:text-sm font-black shadow-lg transition cursor-pointer">
-            <span>🛡️</span>
             <span class="hidden sm:inline">لوحة المشرف</span>
           </button>
 
           <!-- زر تحديث الصفحة المخصص -->
 
-          <!-- زر الإعدادات -->
-          <button id="openSettingsBtn" type="button" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-1 transition cursor-pointer" title="الإعدادات">
-            <span>⚙️</span>
-            <span class="hidden md:inline">الإعدادات</span>
-          </button>
-
-          <!-- زر الخروج -->
-          <button id="leaveRoomBtn" type="button" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs sm:text-sm font-extrabold transition cursor-pointer">
-            خروج
-          </button>
+          <details id="roomActions" class="room-menu">
+            <summary aria-label="خيارات الغرفة" title="خيارات الغرفة">⋯</summary>
+            <div class="room-menu-panel">
+              <button id="openSettingsBtn" type="button">الإعدادات</button>
+              <button id="leaveRoomBtn" type="button" class="danger-action">مغادرة الغرفة</button>
+            </div>
+          </details>
         </div>
       </div>
     </header>
@@ -1123,7 +1149,7 @@
               <span>👥</span>
               <span>المتواجدون في الغرفة</span>
             </h3>
-            <span class="text-[11px] font-bold text-emerald-400">حقيقيون فقط 🟢</span>
+            <span class="text-[11px] font-bold text-emerald-400"></span>
           </div>
           <div id="playersLeaderboard" class="space-y-2 overflow-y-auto pr-1 flex-1"></div>
         </div>
@@ -1132,50 +1158,21 @@
         <div id="mobileTabChat" class="hidden lg:flex flex-col glass-card rounded-3xl p-4 flex-1 min-h-0 overflow-hidden">
           <div class="flex items-center justify-between mb-3 shrink-0">
             <h3 class="text-sm font-black text-white flex items-center gap-2">
-              <span>💬</span>
               <span>الدردشة المباشرة</span>
             </h3>
             <div class="flex items-center gap-1.5">
-              <button id="scrollChatBottomBtn" type="button" class="hidden px-2 py-0.5 rounded-full bg-[#7c3aed]/30 hover:bg-[#7c3aed]/50 text-violet-200 border border-violet-400/40 text-[10px] font-black cursor-pointer">⬇️ الأحدث</button>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-400/25">مباشر 🟢</span>
+              <button id="scrollChatBottomBtn" type="button" class="hidden px-2 py-0.5 rounded-full bg-[#7c3aed]/30 hover:bg-[#7c3aed]/50 text-violet-200 border border-violet-400/40 text-[10px] font-black cursor-pointer">الأحدث</button>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-400/25">متصل</span>
             </div>
           </div>
 
           <div id="chatFeed" class="flex-1 overflow-y-auto smooth-scroll space-y-2.5 pr-1 mb-3"></div>
 
           <div id="mutedNotice" class="hidden mb-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-rose-400 text-xs font-bold text-center">
-            🔇 تم كتمك من الدردشة من قبل المشرف.
+            الدردشة مكتومة في هذه الغرفة.
           </div>
 
           <div id="chatComposerWrap" class="shrink-0">
-            <div class="flex items-center justify-between gap-1.5 mb-2">
-              <button data-reaction="👏" type="button" class="quick-react-btn flex-1 py-1 rounded-xl bg-[#0f111a]/80 hover:bg-[#7c3aed]/25 border border-white/5 text-sm transition active:scale-90 cursor-pointer">👏</button>
-              <button data-reaction="😂" type="button" class="quick-react-btn flex-1 py-1 rounded-xl bg-[#0f111a]/80 hover:bg-[#7c3aed]/25 border border-white/5 text-sm transition active:scale-90 cursor-pointer">😂</button>
-              <button data-reaction="🔥" type="button" class="quick-react-btn flex-1 py-1 rounded-xl bg-[#0f111a]/80 hover:bg-[#7c3aed]/25 border border-white/5 text-sm transition active:scale-90 cursor-pointer">🔥</button>
-              <button data-reaction="❤️" type="button" class="quick-react-btn flex-1 py-1 rounded-xl bg-[#0f111a]/80 hover:bg-[#7c3aed]/25 border border-white/5 text-sm transition active:scale-90 cursor-pointer">❤️</button>
-              <button data-reaction="🎉" type="button" class="quick-react-btn flex-1 py-1 rounded-xl bg-[#0f111a]/80 hover:bg-[#7c3aed]/25 border border-white/5 text-sm transition active:scale-90 cursor-pointer">🎉</button>
-            </div>
-
-            <!-- شريط الوسائط -->
-            <div class="flex items-center gap-1.5 mb-2">
-              <label class="flex-1 py-1.5 px-2 rounded-xl bg-[#0f111a]/85 hover:bg-[#7c3aed]/20 border border-white/10 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1 transition cursor-pointer" title="إرسال صورة">
-                <span>📷</span>
-                <span>صورة</span>
-                <input id="chatImageInput" type="file" accept="image/*" class="hidden">
-              </label>
-              <button id="openMediaShareBtn" type="button" class="flex-1 py-1.5 px-2 rounded-xl bg-[#0f111a]/85 hover:bg-[#06b6d4]/20 border border-white/10 text-[11px] font-bold text-cyan-400 flex items-center justify-center gap-1 transition cursor-pointer" title="مشاركة فيديو أو رابط">
-                <span>🎬</span>
-                <span class="hidden sm:inline">فيديو/رابط</span>
-              </button>
-              <button id="startVoiceRecBtn" type="button" class="flex-1 py-1.5 px-2 rounded-xl bg-[#0f111a]/85 hover:bg-rose-500/20 border border-white/10 text-[11px] font-bold text-rose-400 flex items-center justify-center gap-1 transition cursor-pointer" title="تسجيل مقطع صوتي">
-                <span>🎙️</span>
-                <span>صوت</span>
-              </button>
-              <label class="py-1.5 px-2.5 rounded-xl bg-[#0f111a]/85 hover:bg-amber-500/20 border border-white/10 text-[11px] font-bold text-amber-400 flex items-center justify-center gap-1 transition cursor-pointer" title="رفع ملف صوتي">
-                <span>🎵</span>
-                <input id="chatAudioFileInput" type="file" accept="audio/*" class="hidden">
-              </label>
-            </div>
 
             <!-- شريط التسجيل الصوتي -->
             <div id="voiceRecordingBar" class="hidden mb-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-400/40 flex items-center justify-between gap-2 animate-fade-up">
@@ -1185,13 +1182,24 @@
                 <span id="voiceRecTimer" class="text-xs font-black text-white keep-white-text tracking-wider px-2 py-0.5 rounded-lg bg-rose-600/70">00:00</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <button id="cancelVoiceRecBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold cursor-pointer">❌</button>
-                <button id="sendVoiceRecBtn" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-extrabold text-white keep-white-text cursor-pointer">📤 إرسال</button>
+                <button id="cancelVoiceRecBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold cursor-pointer">إلغاء</button>
+                <button id="sendVoiceRecBtn" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-extrabold text-white keep-white-text cursor-pointer">إرسال</button>
               </div>
             </div>
 
-            <form id="chatForm" class="flex items-center gap-2">
-              <input id="chatInput" type="text" autocomplete="off" maxlength="350" placeholder="اكتب رسالة أو الصق رابط فيديو..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0f111a]/90 border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-[#7c3aed] transition">
+            <form id="chatForm" class="flex items-center gap-1.5">
+              <details id="attachmentMenu" class="room-menu">
+                <summary aria-label="إرفاق وسائط" title="إرفاق وسائط">+</summary>
+                <div class="room-menu-panel">
+                  <button id="pickChatImage" type="button">صورة</button>
+                  <button id="openMediaShareBtn" type="button">فيديو أو رابط</button>
+                  <button id="startVoiceRecBtn" type="button">تسجيل صوتي</button>
+                  <button id="pickChatAudio" type="button">ملف صوتي</button>
+                </div>
+              </details>
+              <input id="chatImageInput" type="file" accept="image/*" hidden>
+              <input id="chatAudioFileInput" type="file" accept="audio/*" hidden>
+              <input id="chatInput" type="text" autocomplete="off" maxlength="350" aria-label="الرسالة" placeholder="اكتب رسالة…" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0f111a]/90 border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-[#7c3aed] transition">
               <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#7c3aed] hover:bg-violet-500 active:scale-95 text-white keep-white-text text-xs sm:text-sm font-extrabold transition cursor-pointer shrink-0">إرسال</button>
             </form>
           </div>
@@ -1200,29 +1208,21 @@
     </div>
 
     <!-- شريط التنقل السفلي للهواتف -->
-    <nav class="lg:hidden shrink-0 glass-bar border-t px-2 py-1.5 z-20">
-      <div class="grid grid-cols-5 gap-1 max-w-lg mx-auto">
-        <button data-mob-tab="chat" type="button" class="mob-nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
-          <span id="mobUnreadDot" class="hidden absolute top-1 left-1/3 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0f111a]"></span>
-          <span class="text-base leading-none mb-1">💬</span>
-          <span>الدردشة</span>
+    <nav class="lg:hidden shrink-0 glass-bar border-t px-2 py-1.5 z-20" aria-label="أقسام الغرفة">
+      <div class="grid grid-cols-4 gap-1 max-w-lg mx-auto">
+        <button data-mob-tab="chat" type="button" class="mob-nav-btn relative">
+          <span id="mobUnreadDot" class="hidden absolute top-2 left-2 w-2 h-2 rounded-full bg-rose-500"></span>
+          الدردشة
         </button>
-        <button data-mob-tab="subjects" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
-          <span class="text-base leading-none mb-1">📚</span>
-          <span>المواد</span>
-        </button>
-        <button data-mob-tab="games" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl bg-[#7c3aed]/25 text-violet-400 font-bold text-[11px] transition cursor-pointer">
-          <span class="text-base leading-none mb-1">🎮</span>
-          <span>الألعاب</span>
-        </button>
-        <button data-mob-tab="athkar" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
-          <span class="text-base leading-none mb-1">📿</span>
-          <span>الأذكار</span>
-        </button>
-        <button data-mob-tab="players" type="button" class="mob-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 font-bold text-[11px] transition cursor-pointer">
-          <span class="text-base leading-none mb-1">👥</span>
-          <span>الأعضاء</span>
-        </button>
+        <button data-mob-tab="subjects" type="button" class="mob-nav-btn">المواد</button>
+        <button data-mob-tab="games" type="button" class="mob-nav-btn">الألعاب</button>
+        <details id="roomMore" class="room-menu">
+          <summary id="roomMoreLabel">المزيد</summary>
+          <div class="room-menu-panel">
+            <button data-mob-tab="athkar" type="button" class="mob-nav-btn">الأذكار</button>
+            <button data-mob-tab="players" type="button" class="mob-nav-btn">الأعضاء</button>
+          </div>
+        </details>
       </div>
     </nav>
   </div>
@@ -2265,7 +2265,7 @@
 
     function updateUserIdDisplays() {
       const idStr = getEffectiveUserId();
-      dom.entryUserIdBadge.textContent = `🆔 ${idStr}`;
+      dom.entryUserIdBadge.textContent = `${idStr}`;
       dom.headerUserIdText.textContent = `🆔 ${idStr}`;
       dom.headerUserIdText.className = state.isAdmin
         ? 'text-[10px] font-black text-amber-400 leading-tight'
@@ -2287,6 +2287,9 @@
     // =========================================================================
     async function initFirebaseApp() {
       const ownerEntry = location.hash === '#owner';
+      const linkCode = new URLSearchParams(location.search).get('room');
+      const invitedRoom = /^\d{4}$/.test(linkCode || '') ? linkCode : '';
+      if (invitedRoom && !ownerEntry) dom.roomCodeInput.value = invitedRoom;
       loadLocalAthkarState();
       try {
         const cachedProf = JSON.parse(localStorage.getItem(LS_PROFILE_KEY) || 'null');
@@ -2315,7 +2318,7 @@
 
         // البقاء تلقائياً داخل الغرفة المحفوظة حتى يضغط المستخدم زر الخروج
         const savedCode = localStorage.getItem(LS_ROOM_KEY);
-        if (!ownerEntry && savedCode && /^\d{4}$/.test(savedCode)) {
+        if (!ownerEntry && (!invitedRoom || invitedRoom === savedCode) && savedCode && /^\d{4}$/.test(savedCode)) {
           try {
             const snap = await getDoc(roomDocRef(savedCode));
             if (snap.exists()) {
@@ -2637,7 +2640,7 @@
       if (state.messages.length === 0) {
         dom.chatFeed.innerHTML = `
           <div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-500">
-            <div class="text-3xl mb-2">💬</div>
+
             <p class="text-xs font-bold text-slate-300">لا توجد رسائل بعد</p>
             <p class="text-[11px] mt-1">أرسل رسالة، صورة، مقطعاً صوتياً أو رابط فيديو ترفيهي!</p>
           </div>
@@ -3025,6 +3028,10 @@
 
     function switchMobileTab(tab) {
       state.mobileTab = tab;
+      const moreLabel = document.getElementById('roomMoreLabel');
+      const extraView = tab === 'athkar' || tab === 'players';
+      moreLabel.textContent = tab === 'athkar' ? 'الأذكار' : tab === 'players' ? 'الأعضاء' : 'المزيد';
+      moreLabel.classList.toggle('is-current', extraView);
       if (tab === 'chat') dom.mobUnreadDot.classList.add('hidden');
       const isMainSection = tab === 'games' || tab === 'subjects' || tab === 'athkar';
       if (isMainSection) switchDesktopView(tab);
@@ -3546,6 +3553,10 @@
     const ownerRoomMembers = document.getElementById('ownerRoomMembers');
     const ownerCopyCode = document.getElementById('ownerCopyCode');
     const ownerJoinRoom = document.getElementById('ownerJoinRoom');
+    const ownerToggleLock = document.getElementById('ownerToggleLock');
+    const ownerCopyInvite = document.getElementById('ownerCopyInvite');
+    let lockPending = false;
+    let ownedSnapshot = null;
     ownerJoinRoom.addEventListener('click', () => {
       dom.roomCodeInput.value = ownerRoomSelect.value;
       ownerDashboard.close();
@@ -3555,9 +3566,12 @@
     function watchOwnedRoom() {
       stopOwnerRoom?.();
       stopOwnerRoom = undefined;
+      ownedSnapshot = null;
+      ownerToggleLock.disabled = true;
       ownerRoomMembers.replaceChildren();
       ownerCopyCode.disabled = true;
       ownerJoinRoom.disabled = true;
+      ownerCopyInvite.disabled = true;
       const code = ownerRoomSelect.value;
       const uid = state.user?.uid;
       if (!uid || !code) {
@@ -3569,15 +3583,22 @@
         ownerRoomMembers.replaceChildren();
         ownerCopyCode.disabled = true;
         ownerJoinRoom.disabled = true;
+        ownerCopyInvite.disabled = true;
+        ownedSnapshot = null;
+        ownerToggleLock.disabled = true;
         const room = snapshot.data();
         if (room?.ownerUid !== uid) {
           ownerRoomStatus.textContent = 'تعذر العثور على غرفة تملكها بهذا الرمز.';
           return;
         }
+        ownedSnapshot = { code, locked: Boolean(room.locked) };
+        ownerToggleLock.textContent = room.locked ? 'فتح الانضمام' : 'قفل الانضمام';
+        ownerToggleLock.disabled = lockPending;
         const players = Object.values(room.players || {});
         ownerRoomStatus.textContent = (room.locked ? 'غرفة مقفلة' : 'غرفة مفتوحة') + ' · الأعضاء المسجلون الآن ' + players.length;
         ownerCopyCode.disabled = false;
         ownerJoinRoom.disabled = false;
+        ownerCopyInvite.disabled = false;
         for (const player of players) {
           const item = document.createElement('li');
           item.className = 'rounded-lg border p-2';
@@ -3588,6 +3609,9 @@
         ownerRoomMembers.replaceChildren();
         ownerCopyCode.disabled = true;
         ownerJoinRoom.disabled = true;
+        ownerCopyInvite.disabled = true;
+        ownedSnapshot = null;
+        ownerToggleLock.disabled = true;
         ownerRoomStatus.textContent = 'تعذر تحميل بيانات الغرفة.';
       });
     }
@@ -3606,6 +3630,39 @@
     ownerDashboard.addEventListener('close', () => {
       stopOwnerRoom?.();
       stopOwnerRoom = undefined;
+    });
+    ownerToggleLock.addEventListener('click', async () => {
+      const selected = ownedSnapshot;
+      const uid = state.user?.uid;
+      if (!selected || !uid || lockPending || selected.code !== ownerRoomSelect.value) return;
+      lockPending = true;
+      ownerToggleLock.disabled = true;
+      try {
+        const ref = roomDocRef(selected.code);
+        await runTransaction(db, async transaction => {
+          const current = await transaction.get(ref);
+          if (!current.exists() || current.data().ownerUid !== uid) throw new Error('owner_required');
+          if (Boolean(current.data().locked) === selected.locked) {
+            transaction.update(ref, { locked: !selected.locked });
+          }
+        });
+      } catch {
+        if (ownerRoomSelect.value === selected.code) ownerRoomStatus.textContent = 'تعذر تغيير حالة الانضمام. تحقق من صلاحية الغرفة والاتصال.';
+      } finally {
+        lockPending = false;
+        ownerToggleLock.disabled = !ownedSnapshot;
+      }
+    });
+    ownerCopyInvite.addEventListener('click', async () => {
+      if (!ownedSnapshot) return;
+      const invite = new URL(location.pathname, location.origin);
+      invite.searchParams.set('room', ownedSnapshot.code);
+      try {
+        await navigator.clipboard.writeText(invite.href);
+        ownerRoomStatus.textContent = 'تم نسخ رابط الدعوة.';
+      } catch {
+        ownerRoomStatus.textContent = invite.href;
+      }
     });
     ownerCopyCode.addEventListener('click', async () => {
       const code = ownerRoomSelect.value;
@@ -3774,7 +3831,18 @@
         imageCaption.disabled = false;
       }
     });
+    document.getElementById('pickChatImage').addEventListener('click', () => dom.chatImageInput.click());
+    document.getElementById('pickChatAudio').addEventListener('click', () => dom.chatAudioFileInput.click());
     dom.openMediaShareBtn.addEventListener('click', () => dom.mediaShareModal.classList.remove('hidden'));
+    document.querySelectorAll('.room-menu').forEach(menu => {
+      menu.addEventListener('click', event => { if (event.target.closest('button')) menu.open = false; });
+      menu.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
+      });
+    });
+    document.addEventListener('click', event => {
+      document.querySelectorAll('.room-menu[open]').forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
+    });
     dom.closeMediaShareModalBtn.addEventListener('click', () => dom.mediaShareModal.classList.add('hidden'));
     dom.closeLightboxBtn.addEventListener('click', () => dom.imageLightboxModal.classList.add('hidden'));
     dom.imageLightboxModal.addEventListener('click', (e) => { if (e.target === dom.imageLightboxModal) dom.imageLightboxModal.classList.add('hidden'); });
@@ -3822,7 +3890,6 @@
       } catch { showToast('تعذر إرسال الرسالة. يمكنك إعادة المحاولة.', 'error'); }
       finally { sendingChat = false; }
     });
-    document.querySelectorAll('.quick-react-btn').forEach(btn => btn.addEventListener('click', () => sendOnlineChatMessage(btn.dataset.reaction)));
     document.querySelectorAll('.game-tab-btn').forEach(btn => btn.addEventListener('click', () => switchGameTab(btn.dataset.gameTab)));
     document.querySelectorAll('.mob-nav-btn').forEach(btn => btn.addEventListener('click', () => switchMobileTab(btn.dataset.mobTab)));
 

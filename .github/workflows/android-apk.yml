@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  APK_VERSION: 1.0.1
-  APK_VERSION_CODE: 10001
+  APK_VERSION: 1.0.2
+  APK_VERSION_CODE: 10002
 
 jobs:
   build-and-publish:
@@ -42,7 +42,19 @@ jobs:
           trap 'rm -rf "$build"' EXIT
           mkdir -p "$build/classes" "$build/dex" dist
           sed -E -e "s/android:versionCode=\"[0-9]+\"/android:versionCode=\"$APK_VERSION_CODE\"/" -e "s/android:versionName=\"[^\"]+\"/android:versionName=\"$APK_VERSION\"/" android/AndroidManifest.xml > "$build/AndroidManifest.xml"
-          "$tools/aapt2" link -I "$platform" --manifest "$build/AndroidManifest.xml" -o "$build/unsigned.apk"
+          sed -i 's/<application /<application android:icon="@drawable\/lamma_launcher" /' "$build/AndroidManifest.xml"
+          mkdir -p "$build/res/drawable"
+          cat > "$build/res/drawable/lamma_launcher.xml" <<'ICON'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#143D36" android:pathData="M24,0H84Q108,0 108,24V84Q108,108 84,108H24Q0,108 0,84V24Q0,0 24,0Z"/>
+              <path android:fillColor="#C7F4DA" android:pathData="M18,45L54,28L90,45L54,62Z M34,56L54,66L74,56V69Q54,84 34,69Z"/>
+              <path android:strokeColor="#EFC780" android:strokeWidth="3" android:strokeLineCap="round" android:pathData="M86,48V67"/>
+          </vector>
+          ICON
+          "$tools/aapt2" compile --dir "$build/res" -o "$build/resources.zip"
+          "$tools/aapt2" link -I "$platform" --manifest "$build/AndroidManifest.xml" -o "$build/unsigned.apk" "$build/resources.zip"
           javac --release 8 -encoding UTF-8 -classpath "$platform" -d "$build/classes" android/MainActivity.java
           jar cf "$build/classes.jar" -C "$build/classes" .
           "$tools/d8" --lib "$platform" --min-api 23 --output "$build/dex" "$build/classes.jar"
@@ -72,5 +84,5 @@ jobs:
           else
             gh release create "$tag" "dist/$apk" --target "$GITHUB_SHA" \
               --title "لمّة طلاب Android $tag" \
-              --notes "إصدار أندرويد يتضمن واجهة الدردشة المبسطة والتنقل الجديد عبر الموقع المنشور. التوقيع تجريبي وقد يلزم تثبيت نظيف عند الانتقال من v1.0.0."
+              --notes "أيقونة قبعة التخرج وتحسين شريطي الغرفة، وإظهار إعدادات المظهر وتقارير الغرفة وإدارة الأعضاء. التوقيع تجريبي وقد يلزم تثبيت نظيف عند الانتقال من نسخة سابقة."
           fi

@@ -13,6 +13,10 @@ concurrency:
   group: lamma-android-apk
   cancel-in-progress: false
 
+env:
+  APK_VERSION: 1.0.1
+  APK_VERSION_CODE: 10001
+
 jobs:
   build-and-publish:
     if: github.repository == 'oday78994-prog/lamma' && github.ref == 'refs/heads/main'
@@ -37,7 +41,8 @@ jobs:
           build=$(mktemp -d)
           trap 'rm -rf "$build"' EXIT
           mkdir -p "$build/classes" "$build/dex" dist
-          "$tools/aapt2" link -I "$platform" --manifest android/AndroidManifest.xml -o "$build/unsigned.apk"
+          sed -E -e "s/android:versionCode=\"[0-9]+\"/android:versionCode=\"$APK_VERSION_CODE\"/" -e "s/android:versionName=\"[^\"]+\"/android:versionName=\"$APK_VERSION\"/" android/AndroidManifest.xml > "$build/AndroidManifest.xml"
+          "$tools/aapt2" link -I "$platform" --manifest "$build/AndroidManifest.xml" -o "$build/unsigned.apk"
           javac --release 8 -encoding UTF-8 -classpath "$platform" -d "$build/classes" android/MainActivity.java
           jar cf "$build/classes.jar" -C "$build/classes" .
           "$tools/d8" --lib "$platform" --min-api 23 --output "$build/dex" "$build/classes.jar"
@@ -46,20 +51,26 @@ jobs:
           keytool -genkeypair -keystore "$build/android.p12" -storetype PKCS12 \
             -storepass lamma-build-only -alias lamma -keyalg RSA -keysize 2048 \
             -validity 10000 -dname 'CN=Lamma Android Preview' -noprompt
-          apk=dist/Lamma-Tullab-v1.0.0.apk
+          apk="dist/Lamma-Tullab-v$APK_VERSION.apk"
           "$tools/apksigner" sign --ks "$build/android.p12" --ks-key-alias lamma \
             --ks-pass pass:lamma-build-only --out "$apk" "$build/aligned.apk"
           "$tools/apksigner" verify --verbose --print-certs "$apk"
-          "$tools/aapt2" dump badging "$apk"
-      - name: Attach verified APK to the existing release
+          "$tools/aapt2" dump badging "$apk" > "$build/badging.txt"
+          grep -F "versionCode='$APK_VERSION_CODE' versionName='$APK_VERSION'" "$build/badging.txt"
+      - name: Publish the verified APK
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          apk=Lamma-Tullab-v1.0.0.apk
-          if gh release view v1.0.0 --json assets --jq '.assets[].name' | grep -Fxq "$apk"; then
-            echo 'The signed APK has already been published.'
+          tag="v$APK_VERSION"
+          apk="Lamma-Tullab-$tag.apk"
+          if gh release view "$tag" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/lamma-assets"; then
+            if ! grep -Fxq "$apk" "$RUNNER_TEMP/lamma-assets"; then
+              gh release upload "$tag" "dist/$apk"
+            fi
           else
-            gh release upload v1.0.0 "dist/$apk"
+            gh release create "$tag" "dist/$apk" --target "$GITHUB_SHA" \
+              --title "لمّة طلاب Android $tag" \
+              --notes "إصدار أندرويد يتضمن واجهة الدردشة المبسطة والتنقل الجديد عبر الموقع المنشور. التوقيع تجريبي وقد يلزم تثبيت نظيف عند الانتقال من v1.0.0."
           fi

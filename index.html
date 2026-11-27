@@ -359,13 +359,12 @@
     #entryScreen details summary { margin: 0; }
     #entryScreen details[open] summary { margin-block-end: .65rem; }
     #entryUserIdBadge { display: none; }
-    #entryInstallBtn, #entrySettingsBtn, #openSettingsBtn {
+    #entrySettingsBtn, #openSettingsBtn {
       background: var(--surface);
       color: var(--ink);
       border-color: var(--line);
     }
     #ownerDashboard, #chatImageDraft { color: var(--ink); }
-    .entry-card #openOwnerDashboard { border-color: var(--line); color: var(--ink); }
     #roomScreen .mob-nav-btn {
       min-width: 0;
       min-height: 48px;
@@ -380,7 +379,7 @@
       #openProfileBtn { max-width: 7.5rem; }
     }
     @media (hover: hover) {
-      #roomScreen .mob-nav-btn:hover, .entry-card #openOwnerDashboard:hover { background: var(--selected); }
+      #roomScreen .mob-nav-btn:hover { background: var(--selected); }
       #confirmJoinBtn:hover { filter: brightness(1.12); }
     }
     :root {
@@ -488,10 +487,6 @@
   <main id="entryScreen" class="hidden w-full flex flex-col items-center p-4 sm:p-6">
     <!-- أزرار سريعة في الأعلى -->
     <div class="w-full max-w-md flex items-center justify-between gap-2 mb-3">
-      <button id="entryInstallBtn" type="button" class="px-3.5 py-2 rounded-xl bg-gradient-to-l from-[#7c3aed]/25 to-[#06b6d4]/25 hover:brightness-110 border border-cyan-400/35 text-xs font-extrabold text-cyan-400 flex items-center gap-1.5 transition cursor-pointer">
-        <span>📲</span>
-        <span>تثبيت التطبيق</span>
-      </button>
       <div class="flex items-center gap-1.5">
         <button id="entrySettingsBtn" type="button" class="px-3.5 py-2 rounded-xl glass-card hover:opacity-90 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition cursor-pointer">
           <span>⚙️</span>
@@ -522,11 +517,6 @@
         <p id="nicknameError" class="hidden text-xs text-rose-400 mt-1 font-bold"></p>
       </div>
 
-      <!-- اختيار الأفاتار -->
-      <details class="mb-5">
-        <summary class="text-sm font-bold mb-2 cursor-pointer">اختيار صورة شخصية (اختياري)</summary>
-        <div id="avatarGrid" class="grid grid-cols-4 gap-2"><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#7c3aed]/30 border-2 border-[#7c3aed] scale-105">🎓</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🚀</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🦊</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🐱</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🎮</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🎨</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">⚡</button><button type="button" class="h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800">🌟</button></div>
-      </details>
 
       <!-- أزرار إنشاء غرفة أو انضمام -->
       <div class="space-y-2.5">
@@ -540,12 +530,7 @@
           </div>
           <p id="joinCodeError" class="hidden text-xs text-rose-400 font-bold" role="alert"></p>
         </div>
-        <button id="createRoomBtn" type="button" class="w-full py-3.5 px-5 rounded-xl font-extrabold text-sm text-white keep-white-text bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] hover:brightness-110 active:scale-[0.98] transition shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2 cursor-pointer">
-          <span>✨</span>
-          <span>إنشاء غرفة جديدة</span>
-        </button>
       </div>
-      <button id="openOwnerDashboard" type="button" class="w-full mt-4 rounded-xl border px-4 text-sm font-bold">لوحة غرفي</button>
     </div>
   </main>
 
@@ -568,6 +553,11 @@
     <form method="dialog" class="flex items-center justify-between gap-3 mb-4">
       <h2 id="ownerTitle" class="text-xl font-bold">لوحة المالك</h2>
       <button class="px-3">إغلاق</button>
+    </form>
+    <form id="createRoomForm" class="flex flex-col gap-2 mb-5">
+      <label for="ownerNickname" class="text-sm">اسمك داخل الغرفة</label>
+      <input id="ownerNickname" required maxlength="18" class="rounded-xl border bg-transparent px-3 py-2 text-base">
+      <button id="createRoomBtn" type="submit" class="rounded-xl px-4 font-bold">إنشاء غرفة جديدة</button>
     </form>
     <label for="ownerRoomSelect" class="block text-sm mb-2">الغرف المنشأة من هذا المتصفح</label>
     <select id="ownerRoomSelect" class="w-full rounded-xl px-3 mb-3 bg-transparent border"></select>
@@ -1316,15 +1306,12 @@
 
       <!-- تبويبات الإعدادات -->
       <div class="px-5 pt-4 pb-2 shrink-0">
-        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-[#0f111a]/85 border border-white/10">
+        <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#0f111a]/85 border border-white/10">
           <button data-settings-tab="appearance" type="button" class="settings-tab-btn py-2 px-2 rounded-xl text-xs transition cursor-pointer font-extrabold bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] text-white keep-white-text">
             🎨 المظهر
           </button>
           <button data-settings-tab="timer" type="button" class="settings-tab-btn py-2 px-2 rounded-xl text-xs transition cursor-pointer font-bold text-slate-400 hover:text-white">
             ⏱️ مؤقت الدراسة
-          </button>
-          <button data-settings-tab="admin" type="button" class="settings-tab-btn py-2 px-2 rounded-xl text-xs transition cursor-pointer font-bold text-slate-400 hover:text-white">
-            🛡️ أمر المشرف
           </button>
         </div>
       </div>
@@ -1385,34 +1372,6 @@
             <button id="testAlarmSoundBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/35 border border-violet-400/35 text-violet-300 text-xs font-extrabold transition cursor-pointer">🔊 تجربة الصوت</button>
           </div>
         </div>
-
-        <!-- التبويب 3: أمر المشرف السري -->
-        <div id="settingsTabAdmin" class="hidden space-y-4">
-          <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-400/25 space-y-3">
-            <div class="flex items-center gap-2 text-sm font-black text-rose-400">
-              <span>🛡️</span>
-              <span>تفعيل صلاحيات المشرف (البرومبت السري)</span>
-            </div>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              عند إدخال الرمز السري يحصل المشرف على الـ ID المميّز <b>0001 👑</b> وصلاحية طرد وكتم المستخدمين وحذف الرسائل وقفل الغرفة.
-            </p>
-            <div class="flex gap-2">
-              <input id="adminPromptInput" type="password" placeholder="أدخل البرومبت السري هنا..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0f111a]/90 border border-white/10 text-white text-sm font-bold focus:outline-none focus:border-amber-400">
-              <button id="activateAdminBtn" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-l from-rose-600 to-amber-500 hover:brightness-110 text-white keep-white-text text-xs sm:text-sm font-black transition cursor-pointer shrink-0">تفعيل</button>
-            </div>
-            <div id="adminActiveStatus" class="hidden p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 text-xs font-bold text-center">
-              ✓ وضع المشرف مفعّل! رمزك المميّز: 🆔 0001 👑
-            </div>
-          </div>
-        </div>
-
-        <!-- زر تثبيت وتحميل التطبيق -->
-        <div class="mt-5 pt-4 border-t border-white/10">
-          <button id="settingsInstallBtn" type="button" class="w-full py-2.5 px-4 rounded-xl bg-[#06b6d4]/15 hover:bg-[#06b6d4]/25 border border-[#06b6d4]/35 text-cyan-400 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition cursor-pointer">
-            <span>📲</span>
-            <span>تثبيت التطبيق على الهاتف / تحميل ملف التطبيق</span>
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -1468,48 +1427,6 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- النافذة 5: تثبيت التطبيق وتحميل ملف التطبيق                           -->
-  <!-- ===================================================================== -->
-  <div id="installModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-card rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden animate-pop border border-cyan-400/35">
-      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-l from-[#7c3aed]/20 to-[#06b6d4]/20">
-        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-          <span>📲</span>
-          <span>تثبيت التطبيق على الهاتف</span>
-        </h3>
-        <button id="closeInstallModalBtn" type="button" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer">✕</button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-4">
-        <button id="pwaOneTapInstallBtn" type="button" class="hidden w-full py-3.5 px-4 rounded-xl font-black text-sm text-white keep-white-text bg-gradient-to-l from-emerald-500 to-cyan-500 hover:brightness-110 transition cursor-pointer">
-          ⚡ تثبيت مباشر بضغطة واحدة الآن
-        </button>
-
-        <div class="p-3.5 rounded-2xl bg-[#0f111a]/80 border border-white/10 space-y-1.5">
-          <div class="text-xs sm:text-sm font-black text-emerald-400">🤖 أندرويد (Chrome):</div>
-          <ol class="text-xs text-slate-300 space-y-1 list-decimal list-inside">
-            <li>افتح رابط التطبيق في <b>Google Chrome</b>.</li>
-            <li>اضغط القائمة <b>(⋮)</b> ثم اختر <b>"تثبيت التطبيق"</b> أو <b>"إضافة إلى الشاشة الرئيسية"</b>.</li>
-          </ol>
-        </div>
-
-        <div class="p-3.5 rounded-2xl bg-[#0f111a]/80 border border-white/10 space-y-1.5">
-          <div class="text-xs sm:text-sm font-black text-cyan-400">🍎 آيفون (Safari):</div>
-          <ol class="text-xs text-slate-300 space-y-1 list-decimal list-inside">
-            <li>افتح رابط التطبيق في <b>Safari</b>.</li>
-            <li>اضغط زر المشاركة <b>(↑)</b> ثم <b>"إضافة إلى الشاشة الرئيسية"</b>.</li>
-          </ol>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-[#7c3aed]/15 border border-[#7c3aed]/35 space-y-2.5">
-          <div class="text-xs sm:text-sm font-black text-violet-300">📦 تحميل ملف التطبيق الكامل</div>
-          <a href="https://github.com/oday78994-prog/lamma/releases/download/v1.0.0/lamma-tullab-v1.0.0.html" class="block w-full py-3 rounded-xl text-center font-bold text-white keep-white-text bg-emerald-700 hover:brightness-110">تنزيل ملف لمّة طلاب 1.0.0</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
   <!-- النافذة 6: مشاركة فيديو + معاينة الصور                                -->
   <!-- ===================================================================== -->
   <div id="mediaShareModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1558,7 +1475,7 @@
   
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import {
       getFirestore,
       doc,
@@ -1587,7 +1504,6 @@
     };
     const LS_ROOM_KEY = 'lamma_saved_room_code';
     const LS_PROFILE_KEY = 'lamma_saved_profile';
-    const LS_ADMIN_KEY = 'lamma_saved_is_admin';
     const LS_ATHKAR_KEY = 'lamma_custom_athkar_v1';
     const LS_ATHKAR_COUNTS_KEY = 'lamma_athkar_counts_v1';
     const app = initializeApp(firebaseConfig);
@@ -1595,7 +1511,6 @@
     const db = getFirestore(app);
 
     // ثوابت التطبيق
-    const ADMIN_SECRET_PROMPT = 'ADMIN-LAMMA-2026';
     const ADMIN_VIP_ID = '0001 👑';
     const AVATARS = ['🎓', '🚀', '🦊', '🐱', '🎮', '🎨', '⚡', '🌟'];
     const XO_WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
@@ -1865,7 +1780,6 @@
       user: null,
       isAdmin: false,
       theme: 'dark', // 'dark' | 'light'
-      deferredInstallPrompt: null,
       profile: {
         name: '',
         avatar: '🎓',
@@ -1912,7 +1826,6 @@
       loadingOverlay: document.getElementById('loadingOverlay'),
 
       entryScreen: document.getElementById('entryScreen'),
-      entryInstallBtn: document.getElementById('entryInstallBtn'),
       entrySettingsBtn: document.getElementById('entrySettingsBtn'),
       scrollChatBottomBtn: document.getElementById('scrollChatBottomBtn'),
       gamesWorkspaceWrap: document.getElementById('gamesWorkspaceWrap'),
@@ -1952,7 +1865,6 @@
       entryUserIdBadge: document.getElementById('entryUserIdBadge'),
       nicknameInput: document.getElementById('nicknameInput'),
       nicknameError: document.getElementById('nicknameError'),
-      avatarGrid: document.getElementById('avatarGrid'),
       createRoomBtn: document.getElementById('createRoomBtn'),
       roomCodeInput: document.getElementById('roomCodeInput'),
       confirmJoinBtn: document.getElementById('confirmJoinBtn'),
@@ -2011,10 +1923,8 @@
       closeSettingsModalBtn: document.getElementById('closeSettingsModalBtn'),
       settingsTabAppearance: document.getElementById('settingsTabAppearance'),
       settingsTabTimer: document.getElementById('settingsTabTimer'),
-      settingsTabAdmin: document.getElementById('settingsTabAdmin'),
       themeDarkBtn: document.getElementById('themeDarkBtn'),
       themeLightBtn: document.getElementById('themeLightBtn'),
-      settingsInstallBtn: document.getElementById('settingsInstallBtn'),
       timerBigDisplay: document.getElementById('timerBigDisplay'),
       timerProgressBar: document.getElementById('timerProgressBar'),
       customTimerMinutes: document.getElementById('customTimerMinutes'),
@@ -2024,9 +1934,6 @@
       timerResetBtn: document.getElementById('timerResetBtn'),
       alarmSoundToggle: document.getElementById('alarmSoundToggle'),
       testAlarmSoundBtn: document.getElementById('testAlarmSoundBtn'),
-      adminPromptInput: document.getElementById('adminPromptInput'),
-      activateAdminBtn: document.getElementById('activateAdminBtn'),
-      adminActiveStatus: document.getElementById('adminActiveStatus'),
 
       adminModal: document.getElementById('adminModal'),
       closeAdminModalBtn: document.getElementById('closeAdminModalBtn'),
@@ -2039,9 +1946,6 @@
       kickedModal: document.getElementById('kickedModal'),
       closeKickedModalBtn: document.getElementById('closeKickedModalBtn'),
 
-      installModal: document.getElementById('installModal'),
-      closeInstallModalBtn: document.getElementById('closeInstallModalBtn'),
-      pwaOneTapInstallBtn: document.getElementById('pwaOneTapInstallBtn'),
 
       mediaShareModal: document.getElementById('mediaShareModal'),
       closeMediaShareModalBtn: document.getElementById('closeMediaShareModalBtn'),
@@ -2308,39 +2212,6 @@
     function userPrefsDocRef(uid) { return doc(db, 'artifacts', appId, 'users', uid, 'settings', 'preferences'); }
 
     // =========================================================================
-    // PWA Manifest & تحميل ملف التطبيق
-    // =========================================================================
-    function setupDynamicPWAManifest() {
-      try {
-        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="256" y="330" font-size="250" text-anchor="middle">🎓</text></svg>`;
-        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
-        const manifest = {
-          name: 'لَمّة طلاب — دردشة وألعاب جماعية',
-          short_name: 'لَمّة طلاب',
-          id: new URL('.', location.href).pathname,
-          start_url: new URL('.', location.href).href,
-          display: 'standalone',
-          background_color: '#111a1c',
-          theme_color: '#111a1c',
-          lang: 'ar',
-          dir: 'rtl',
-          icons: [{ src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }]
-        };
-        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = URL.createObjectURL(blob);
-        document.head.appendChild(link);
-      } catch (e) {}
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      state.deferredInstallPrompt = e;
-      dom.pwaOneTapInstallBtn.classList.remove('hidden');
-    });
-
-    // =========================================================================
     // حفظ وتحميل تفضيلات المستخدم (في Firestore)
     // =========================================================================
     async function saveUserPreferences() {
@@ -2416,7 +2287,6 @@
     // =========================================================================
     async function initFirebaseApp() {
       const ownerEntry = location.hash === '#owner';
-      setupDynamicPWAManifest();
       loadLocalAthkarState();
       try {
         const cachedProf = JSON.parse(localStorage.getItem(LS_PROFILE_KEY) || 'null');
@@ -2429,16 +2299,16 @@
           if (cachedProf.theme) applyTheme(cachedProf.theme);
           if (state.profile.name) dom.nicknameInput.value = state.profile.name;
         }
-        if (localStorage.getItem(LS_ADMIN_KEY) === '1') {
-          state.isAdmin = true;
-        }
       } catch (e) {}
 
       try {
-        const cred = await signInAnonymously(auth);
-        state.user = cred.user;
-        await loadUserPreferences();
-        renderEntryAvatars();
+        await auth.authStateReady();
+        state.user = auth.currentUser || (await signInAnonymously(auth)).user;
+        const [token] = await Promise.all([
+          state.user.getIdTokenResult().catch(() => null),
+          loadUserPreferences()
+        ]);
+        state.isAdmin = token?.claims?.admin === true;
         updateTimerUI();
         startSubjectsListeners();
         renderAthkarList();
@@ -2451,12 +2321,12 @@
             if (snap.exists()) {
               const data = snap.data();
               const uid = state.user.uid;
-              if (!(data.kickedUsers && data.kickedUsers[uid] && !state.isAdmin)) {
+              if (!data.kickedUsers?.[uid] && (!data.locked || data.players?.[uid] || data.ownerUid === uid || state.isAdmin)) {
                 const existing = data.players?.[uid];
                 const finalName = state.profile.name || existing?.name || 'طالب';
                 state.profile.name = finalName;
                 dom.nicknameInput.value = finalName;
-                await updateDoc(roomDocRef(savedCode), {
+                if (!existing) await updateDoc(roomDocRef(savedCode), {
                   [`players.${uid}`]: {
                     uid,
                     name: finalName,
@@ -2478,7 +2348,7 @@
             }
             localStorage.removeItem(LS_ROOM_KEY);
           } catch (rejoinErr) {
-            console.error('Auto-rejoin failed:', rejoinErr);
+            showToast('تعذر فتح الغرفة المحفوظة. تحقق من الاتصال وحاول مجددًا.', 'warn');
           }
         }
 
@@ -2490,21 +2360,6 @@
         dom.entryScreen.classList.remove('hidden');
         showToast('تعذر الاتصال بالخادم. أعد تحميل الصفحة للمحاولة مجددًا.', 'error');
       }
-    }
-
-    function renderEntryAvatars() {
-      dom.avatarGrid.innerHTML = '';
-      AVATARS.forEach(emoji => {
-        const selected = state.profile.avatar === emoji;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `h-12 rounded-2xl text-2xl flex items-center justify-center transition cursor-pointer ${
-          selected ? 'bg-[#7c3aed]/30 border-2 border-[#7c3aed] scale-105' : 'bg-[#0f111a]/75 border border-white/10 hover:bg-slate-800'
-        }`;
-        btn.textContent = emoji;
-        btn.addEventListener('click', () => { state.profile.avatar = emoji; renderEntryAvatars(); });
-        dom.avatarGrid.appendChild(btn);
-      });
     }
 
     function validateEntryNickname() {
@@ -2528,8 +2383,11 @@
     }
 
     async function createRoomOnline() {
-      if (!state.user) return;
-      if (!validateEntryNickname()) return;
+      if (!state.user || dom.createRoomBtn.disabled) return;
+      const nickname = document.getElementById("ownerNickname").value.trim();
+      if (!nickname) return;
+      dom.nicknameInput.value = nickname;
+      state.profile.name = nickname;
 
       let code;
       const uid = state.user.uid;
@@ -2574,6 +2432,7 @@
         try {
           localStorage.setItem('lamma-owned-rooms:' + uid, JSON.stringify([code, ...readOwnedCodes(uid)]));
         } catch { showToast('تعذر حفظ الغرفة في لوحة غرفي على هذا الجهاز.', 'warn'); }
+        ownerDashboard.close();
         enterRoomWorkspace(code);
         showToast(`تم إنشاء الغرفة #${code}! شارك الرمز مع أصدقائك.`, 'success');
       } catch (e) {
@@ -2605,7 +2464,7 @@
         const data = snap.data();
         const uid = state.user.uid;
         if (data.kickedUsers && data.kickedUsers[uid]) { dom.kickedModal.classList.remove('hidden'); return; }
-        if (data.locked && !state.isAdmin && !(data.players && data.players[uid])) {
+        if (data.locked && !state.isAdmin && data.ownerUid !== uid && !data.players?.[uid]) {
           dom.joinCodeError.textContent = '🔒 هذه الغرفة مقفلة حالياً من قِبل المشرف.';
           dom.joinCodeError.classList.remove('hidden');
           return;
@@ -2878,10 +2737,6 @@
       if (!state.user || !state.roomCode) return;
       const clean = text.trim();
       if (!clean) return;
-      if (clean.toLowerCase() === '/admin-lamma-2026' || clean === ADMIN_SECRET_PROMPT) {
-        await activateAdminMode();
-        return true;
-      }
       const urlMatch = clean.match(/https?:\/\/\S+/i);
       if (urlMatch && /(?:youtube\.com|youtu\.be|facebook\.com|fb\.watch|instagram\.com|tiktok\.com)/i.test(urlMatch[0])) {
         return sendRichChatPayload({ mediaType: 'external_video', mediaUrl: urlMatch[0], text: clean.replace(urlMatch[0], '').trim() });
@@ -3003,14 +2858,12 @@
 
     function openSettingsModal(defaultTab = 'appearance') {
       switchSettingsTab(defaultTab);
-      dom.adminActiveStatus.classList.toggle('hidden', !state.isAdmin);
       dom.settingsModal.classList.remove('hidden');
     }
 
     function switchSettingsTab(tab) {
       dom.settingsTabAppearance.classList.toggle('hidden', tab !== 'appearance');
       dom.settingsTabTimer.classList.toggle('hidden', tab !== 'timer');
-      dom.settingsTabAdmin.classList.toggle('hidden', tab !== 'admin');
       document.querySelectorAll('.settings-tab-btn').forEach(btn => {
         const active = btn.dataset.settingsTab === tab;
         btn.className = `settings-tab-btn py-2 px-2 rounded-xl text-xs transition cursor-pointer ${active ? 'font-extrabold bg-gradient-to-l from-[#7c3aed] to-[#06b6d4] text-white keep-white-text' : 'font-bold text-slate-400 hover:text-white'}`;
@@ -3057,24 +2910,6 @@
       state.studyTimer.running = false;
       if (state.studyTimer.intervalId) { clearInterval(state.studyTimer.intervalId); state.studyTimer.intervalId = null; }
       updateTimerUI();
-    }
-
-    async function activateAdminMode() {
-      state.isAdmin = true;
-      try { localStorage.setItem(LS_ADMIN_KEY, '1'); } catch (e) {}
-      syncAdminButtonVisibility();
-      updateUserIdDisplays();
-      dom.adminActiveStatus.classList.remove('hidden');
-      dom.adminPromptInput.value = '';
-      if (state.user && state.roomCode && state.roomData?.players?.[state.user.uid]) {
-        const uid = state.user.uid;
-        await updateDoc(roomDocRef(state.roomCode), {
-          [`players.${uid}.isAdmin`]: true,
-          [`players.${uid}.userIdTag`]: ADMIN_VIP_ID
-        });
-      }
-      renderChatFeed();
-      showToast('🛡️ تم تفعيل صلاحيات المشرف! رمزك المميّز: 0001 👑', 'success');
     }
 
     function syncAdminButtonVisibility() {
@@ -3694,9 +3529,14 @@
     // =========================================================================
     // ربط الأحداث
     // =========================================================================
-    dom.createRoomBtn.addEventListener('click', createRoomOnline);
+    document.getElementById('createRoomForm').addEventListener('submit', event => {
+      event.preventDefault();
+      void createRoomOnline();
+    });
     dom.confirmJoinBtn.addEventListener('click', joinRoomOnline);
-    dom.nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') createRoomOnline(); });
+    dom.nicknameInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') dom.roomCodeInput.focus();
+    });
     dom.roomCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinRoomOnline(); });
 
     dom.copyRoomCodeBtn.addEventListener('click', () => { copyToClipboard(state.roomCode); showToast(`تم نسخ رمز الغرفة #${state.roomCode}!`, 'cyan'); });
@@ -3754,6 +3594,7 @@
 
     function openOwnerDashboard() {
       if (ownerDashboard.open) return;
+      document.getElementById('ownerNickname').value = state.profile.name || '';
       ownerRoomSelect.replaceChildren();
       const codes = state.user ? readOwnedCodes(state.user.uid) : [];
       for (const code of new Set(codes)) ownerRoomSelect.add(new Option('غرفة ' + code, code));
@@ -3761,7 +3602,6 @@
       ownerDashboard.showModal();
       watchOwnedRoom();
     }
-    document.getElementById('openOwnerDashboard').addEventListener('click', openOwnerDashboard);
     ownerRoomSelect.addEventListener('change', watchOwnedRoom);
     ownerDashboard.addEventListener('close', () => {
       stopOwnerRoom?.();
@@ -3834,18 +3674,6 @@
     dom.themeDarkBtn.addEventListener('click', () => { applyTheme('dark'); saveUserPreferences(); showToast('🌙 تم تفعيل الوضع الداكن', 'purple'); });
     dom.themeLightBtn.addEventListener('click', () => { applyTheme('light'); saveUserPreferences(); showToast('☀️ تم تفعيل الوضع الفاتح', 'cyan'); });
 
-    const openInstallModal = () => { dom.settingsModal.classList.add('hidden'); dom.installModal.classList.remove('hidden'); };
-    dom.entryInstallBtn.addEventListener('click', openInstallModal);
-    dom.settingsInstallBtn.addEventListener('click', openInstallModal);
-    dom.closeInstallModalBtn.addEventListener('click', () => dom.installModal.classList.add('hidden'));
-    dom.pwaOneTapInstallBtn.addEventListener('click', async () => {
-      if (!state.deferredInstallPrompt) return;
-      state.deferredInstallPrompt.prompt();
-      await state.deferredInstallPrompt.userChoice;
-      state.deferredInstallPrompt = null;
-      dom.pwaOneTapInstallBtn.classList.add('hidden');
-    });
-
     // مؤقت الدراسة
     document.querySelectorAll('.timer-preset-btn').forEach(btn => btn.addEventListener('click', () => {
       const sec = parseInt(btn.dataset.presetSec, 10);
@@ -3866,11 +3694,6 @@
     dom.stopAlarmBtn.addEventListener('click', () => { AlarmAudio.stopRinging(); dom.alarmBanner.classList.add('hidden'); });
 
     // المشرف
-    dom.activateAdminBtn.addEventListener('click', () => {
-      const val = dom.adminPromptInput.value.trim();
-      if (val === ADMIN_SECRET_PROMPT || val.toLowerCase() === '/admin-lamma-2026') activateAdminMode();
-      else showToast('❌ البرومبت السري غير صحيح.', 'error');
-    });
     dom.openAdminBtn.addEventListener('click', () => { renderAdminPanel(); dom.adminModal.classList.remove('hidden'); });
     dom.closeAdminModalBtn.addEventListener('click', () => dom.adminModal.classList.add('hidden'));
     dom.adminSendWarningBtn.addEventListener('click', sendAdminWarningMessage);

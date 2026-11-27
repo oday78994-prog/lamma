@@ -22,7 +22,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Cairo', 'system-ui', 'sans-serif'],
+            sans: ['Thmanyah Sans', 'Cairo', 'system-ui', 'sans-serif'],
           },
           colors: {
             appbg: '#0f111a',
@@ -289,6 +289,99 @@
     #chatImageDraft img { max-height: 32dvh; max-width: 100%; }
     #chatImageDraft button { min-height: 44px; }
     #chatImageDraft button[type=submit] { background: var(--action); color: white; }
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: local("Thmanyah Sans Regular"), local("thmanyahsans-Regular");
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: local("Thmanyah Sans Bold"), local("thmanyahsans-Bold");
+      font-style: normal;
+      font-weight: 700 900;
+      font-display: swap;
+    }
+    :root {
+      --motion: 170ms cubic-bezier(.2,.75,.25,1);
+      --ink: #eef7f3;
+      --muted: #b4c6c1;
+      --room-field: #152321;
+      --shadow: 0 14px 40px #0003;
+      color-scheme: dark;
+    }
+    :root:has(body.light-mode) { color-scheme: light; }
+    body.light-mode {
+      --ink: #172824;
+      --muted: #48615a;
+      --room-field: #f7faf8;
+      --shadow: 0 14px 40px #132c2510;
+    }
+    html, body, button, input, textarea, select {
+      font-family: "Thmanyah Sans", Cairo, system-ui, sans-serif;
+    }
+    #entryScreen > .entry-card {
+      max-width: 28rem;
+      padding: clamp(1rem, 4vw, 2rem);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: visible;
+    }
+    .entry-card h1 { font-size: clamp(2rem, 7vw, 2.65rem); line-height: 1.2; }
+    .entry-card .entry-mark {
+      display: grid;
+      place-items: center;
+      width: 3.75rem;
+      aspect-ratio: 1;
+      margin-block-end: .75rem;
+      border-radius: 1.15rem;
+      background: var(--selected);
+      font-size: 1.75rem;
+    }
+    .entry-card label, #chatImageDraft label { color: var(--ink); }
+    #nicknameInput, #roomCodeInput, #chatInput, #chatImageDraft input, #ownerRoomSelect, #subjectPostSearch {
+      background: var(--room-field);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      transition: border-color var(--motion), box-shadow var(--motion);
+    }
+    #nicknameInput:focus, #roomCodeInput:focus, #chatInput:focus, #chatImageDraft input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--selected);
+    }
+    #entryScreen details {
+      padding: .65rem .75rem;
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+    }
+    #entryScreen details summary { margin: 0; }
+    #entryScreen details[open] summary { margin-block-end: .65rem; }
+    #entryUserIdBadge { display: none; }
+    #entryInstallBtn, #entrySettingsBtn, #openSettingsBtn {
+      background: var(--surface);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    #ownerDashboard, #chatImageDraft { color: var(--ink); }
+    .entry-card #openOwnerDashboard { border-color: var(--line); color: var(--ink); }
+    #roomScreen .mob-nav-btn {
+      min-width: 0;
+      min-height: 48px;
+      color: var(--muted);
+      transition: background-color var(--motion), color var(--motion), transform var(--motion);
+    }
+    #roomScreen .mob-nav-btn:active, .entry-card button:active { transform: scale(.97); }
+    #roomScreen > nav { background: var(--surface); }
+    #roomScreen > header button { min-height: 44px; }
+    @media (max-width: 480px) {
+      #roomScreen > header > div { gap: .25rem; }
+      #openProfileBtn { max-width: 7.5rem; }
+    }
+    @media (hover: hover) {
+      #roomScreen .mob-nav-btn:hover, .entry-card #openOwnerDashboard:hover { background: var(--selected); }
+      #confirmJoinBtn:hover { filter: brightness(1.12); }
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-violet-600/30">
@@ -334,10 +427,6 @@
         <span>تثبيت التطبيق</span>
       </button>
       <div class="flex items-center gap-1.5">
-        <button id="entryRefreshBtn" type="button" class="px-3 py-2 rounded-xl glass-card hover:opacity-90 text-xs font-bold text-cyan-400 flex items-center gap-1 transition cursor-pointer" title="تحديث الصفحة">
-          <span>🔄</span>
-          <span>تحديث</span>
-        </button>
         <button id="entrySettingsBtn" type="button" class="px-3.5 py-2 rounded-xl glass-card hover:opacity-90 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition cursor-pointer">
           <span>⚙️</span>
           <span>الإعدادات</span>
@@ -345,14 +434,12 @@
       </div>
     </div>
 
-    <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 animate-fade-up relative overflow-hidden">
+    <div class="w-full max-w-md entry-card glass-card rounded-3xl animate-fade-up">
       
 
       <!-- الشعار والعنوان -->
       <div class="flex flex-col items-center text-center mb-5">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] p-[2px] shadow-lg shadow-violet-600/30 mb-3">
-          <div class="w-full h-full rounded-[14px] bg-[#0f111a] flex items-center justify-center text-3xl">🎓</div>
-        </div>
+        <div class="entry-mark" aria-hidden="true">🎓</div>
         <h1 class="text-3xl font-black tracking-tight text-white">لَمّة طلاب</h1>
         <p class="text-slate-400 text-xs sm:text-sm mt-1 font-semibold">
           ادرس والعب مع أصحابك في غرفة واحدة.
@@ -474,10 +561,6 @@
           </button>
 
           <!-- زر تحديث الصفحة المخصص -->
-          <button id="roomRefreshBtn" type="button" class="px-2.5 py-1.5 rounded-xl bg-[#06b6d4]/15 hover:bg-[#06b6d4]/25 border border-[#06b6d4]/30 text-cyan-400 text-xs sm:text-sm font-bold flex items-center gap-1 transition cursor-pointer" title="تحديث الصفحة">
-            <span>🔄</span>
-            <span class="hidden xl:inline">تحديث</span>
-          </button>
 
           <!-- زر الإعدادات -->
           <button id="openSettingsBtn" type="button" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-1 transition cursor-pointer" title="الإعدادات">
@@ -902,6 +985,9 @@
             </div>
 
             <!-- قائمة المنشورات (صور وملخصات) -->
+            <label class="block mb-2 shrink-0 text-xs font-bold">بحث في الملخصات
+              <input id="subjectPostSearch" type="search" class="mt-1 block w-full rounded-xl border px-3 py-2 text-base" placeholder="عنوان أو كلمة من الملخص">
+            </label>
             <div id="subjectPostsFeed" class="flex-1 overflow-y-auto smooth-scroll space-y-3 pr-1 mb-3"></div>
 
             <!-- نموذج إرسال صورة أو ملخص (متاح للجميع) -->
@@ -1762,9 +1848,7 @@
 
       entryScreen: document.getElementById('entryScreen'),
       entryInstallBtn: document.getElementById('entryInstallBtn'),
-      entryRefreshBtn: document.getElementById('entryRefreshBtn'),
       entrySettingsBtn: document.getElementById('entrySettingsBtn'),
-      roomRefreshBtn: document.getElementById('roomRefreshBtn'),
       scrollChatBottomBtn: document.getElementById('scrollChatBottomBtn'),
       gamesWorkspaceWrap: document.getElementById('gamesWorkspaceWrap'),
       subjectsWorkspaceWrap: document.getElementById('subjectsWorkspaceWrap'),
@@ -1783,6 +1867,7 @@
       activeSubjectTitle: document.getElementById('activeSubjectTitle'),
       activeSubjectDesc: document.getElementById('activeSubjectDesc'),
       subjectPostsCount: document.getElementById('subjectPostsCount'),
+      subjectPostSearch: document.getElementById("subjectPostSearch"),
       subjectPostsFeed: document.getElementById('subjectPostsFeed'),
       subjectImgPreviewWrap: document.getElementById('subjectImgPreviewWrap'),
       subjectImgPreview: document.getElementById('subjectImgPreview'),
@@ -2109,6 +2194,7 @@
     function applyTheme(mode) {
       state.theme = mode === 'light' ? 'light' : 'dark';
       document.body.classList.toggle('light-mode', state.theme === 'light');
+      document.querySelector('meta[name=theme-color]').content = state.theme === 'light' ? '#f7f6f2' : '#111a1c';
       const activeCls = 'p-4 rounded-2xl border-2 border-[#7c3aed] bg-[#7c3aed]/20 flex flex-col items-center gap-2 transition cursor-pointer';
       const idleCls = 'p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-2 transition cursor-pointer';
       dom.themeDarkBtn.className = state.theme === 'dark' ? activeCls : idleCls;
@@ -3981,6 +4067,7 @@
       const sub = state.subjects.find(s => s.id === subjectId);
       if (!sub) return;
       state.activeSubjectId = subjectId;
+      dom.subjectPostSearch.value = "";
       dom.activeSubjectTitle.textContent = `${sub.icon || '📘'} ${sub.name}`;
       dom.activeSubjectDesc.textContent = sub.description || 'مشاركة الصور والملخصات متاحة لجميع الطلاب';
       dom.subjectsListView.classList.add('hidden');
@@ -3988,11 +4075,24 @@
       renderSubjectPostsFeed();
     }
 
+    function normalizeSummarySearch(value) {
+      return value.trim().toLowerCase().replace(/[\u064B-\u065F\u0640\u0670]/g, "").replace(/[أإآٱ]/g, "ا");
+    }
+
     function renderSubjectPostsFeed() {
       if (!state.activeSubjectId || !dom.subjectPostsFeed) return;
       const posts = state.subjectPosts.filter(p => p.subjectId === state.activeSubjectId);
+      const query = normalizeSummarySearch(dom.subjectPostSearch.value);
+      const visiblePosts = query ? posts.filter(post => normalizeSummarySearch([post.title, post.text].join(" ")).includes(query)) : posts;
       dom.subjectPostsCount.textContent = `${posts.length} منشور`;
       dom.subjectPostsFeed.innerHTML = '';
+      if (query && !visiblePosts.length) {
+        const empty = document.createElement('p');
+        empty.className = 'rounded-xl border p-4 text-sm';
+        empty.textContent = 'ما في ملخصات بتطابق البحث.';
+        dom.subjectPostsFeed.append(empty);
+        return;
+      }
 
       if (posts.length === 0) {
         dom.subjectPostsFeed.innerHTML = `
@@ -4005,7 +4105,7 @@
         return;
       }
 
-      posts.forEach(post => {
+      visiblePosts.forEach(post => {
         const canDelete = state.isAdmin || (state.user && post.senderId === state.user.uid);
         const card = document.createElement('div');
         card.className = 'p-4 rounded-2xl bg-[#0f111a]/80 border border-white/10 space-y-2.5 animate-fade-up';
@@ -4240,8 +4340,6 @@
     }
 
     // ربط أحداث الميزات الجديدة (التحديث + المحادثة + المواد + الأذكار)
-    dom.entryRefreshBtn.addEventListener('click', () => window.location.reload());
-    dom.roomRefreshBtn.addEventListener('click', () => window.location.reload());
     dom.scrollChatBottomBtn.addEventListener('click', () => {
       dom.chatFeed.scrollTop = dom.chatFeed.scrollHeight;
       dom.scrollChatBottomBtn.classList.add('hidden');
@@ -4284,6 +4382,7 @@
       state.pendingSubjectImage = '';
       dom.subjectImgPreviewWrap.classList.add('hidden');
     });
+    dom.subjectPostSearch.addEventListener('input', renderSubjectPostsFeed);
     dom.publishSubjectPostBtn.addEventListener('click', handlePublishSubjectPost);
 
     document.querySelectorAll('.athkar-tab-btn').forEach(btn => {
